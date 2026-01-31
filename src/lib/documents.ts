@@ -1,7 +1,5 @@
 import prisma from "./db";
 import { generateEmbedding } from "./openai";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse");
 
 // Chunking parameters tuned for insurance documents
 // CHUNK_SIZE: ~800 chars balances context window usage with retrieval precision
@@ -36,6 +34,9 @@ export async function processDocument(
 
     let pdfData;
     try {
+      // Dynamic require to avoid SSR build issues with pdf-parse
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require("pdf-parse");
       pdfData = await pdfParse(fileBuffer);
     } catch (parseError) {
       throw new Error("Unable to read this PDF. It may be corrupted or password-protected.");
