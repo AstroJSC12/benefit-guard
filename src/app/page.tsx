@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Shield,
-  MessageSquare,
   FileText,
   Phone,
   MapPin,
@@ -13,7 +12,6 @@ import {
   Clock,
   ArrowRight,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
 
 export default function Home() {
@@ -44,16 +42,12 @@ export default function Home() {
         {/* Hero Section */}
         <section className="pt-32 pb-20 px-4">
           <div className="container mx-auto max-w-4xl text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Insurance Guidance
-            </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
               Navigate Healthcare Insurance
               <span className="block text-primary">With Confidence</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              Your personal AI co-pilot for understanding coverage, fighting
+              Your personal copilot for understanding coverage, fighting
               unfair bills, and knowing your rights. Available 24/7.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
