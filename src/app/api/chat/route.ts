@@ -75,13 +75,20 @@ export async function POST(request: NextRequest) {
         user?.state
       );
       contextPrompt = buildContextPrompt(context);
+      console.log(`RAG retrieved: ${context.userDocuments.length} doc chunks, ${context.knowledgeBase.length} KB entries`);
+      context.userDocuments.forEach((d, i) => {
+        console.log(`  Doc[${i}] sim=${d.similarity.toFixed(3)} src="${d.source}" preview="${d.content.substring(0, 120)}..."`);
+      });
+      context.knowledgeBase.forEach((kb, i) => {
+        console.log(`  KB[${i}]  sim=${kb.similarity.toFixed(3)} src="${kb.source}"${kb.sourceUrl ? " url=✓" : ""}`);
+      });
     } catch (ragError) {
       // RAG failure is not fatal - log and continue with base knowledge
       console.error("RAG retrieval error (non-fatal):", ragError);
     }
 
     const systemPromptWithContext = contextPrompt
-      ? `${SYSTEM_PROMPT}\n\n--- RELEVANT CONTEXT ---\n${contextPrompt}`
+      ? `${SYSTEM_PROMPT}\n\n=== THE USER'S ACTUAL PLAN DOCUMENTS AND KNOWLEDGE BASE ===\nUse the following information to answer the user's question. Cite specific details. For user documents, include [View Source] links. For laws and regulations, include [Official Source] links. Both link types are provided in the context below.\n\n${contextPrompt}`
       : SYSTEM_PROMPT;
 
     const chatHistory = conversation.messages.map((m: { role: string; content: string }) => ({
@@ -96,11 +103,11 @@ export async function POST(request: NextRequest) {
     ];
 
     const stream = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o",
       messages,
       stream: true,
-      temperature: 0.7,
-      max_tokens: 2000,
+      temperature: 0.3,
+      max_tokens: 1500,
     });
 
     const encoder = new TextEncoder();
@@ -119,20 +126,25 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          await prisma.message.create({
-            data: {
-              conversationId,
-              role: "assistant",
-              content: fullResponse,
-            },
-          });
-
-          if (conversation.title === "New Conversation" && fullResponse) {
-            const titleSummary = message.slice(0, 50);
-            await prisma.conversation.update({
-              where: { id: conversationId },
-              data: { title: titleSummary + (message.length > 50 ? "..." : "") },
+          // Save to DB — but don't kill the stream if this fails
+          try {
+            await prisma.message.create({
+              data: {
+                conversationId,
+                role: "assistant",
+                content: fullResponse,
+              },
             });
+
+            if (conversation.title === "New Conversation" && fullResponse) {
+              const titleSummary = message.slice(0, 50);
+              await prisma.conversation.update({
+                where: { id: conversationId },
+                data: { title: titleSummary + (message.length > 50 ? "..." : "") },
+              });
+            }
+          } catch (dbError) {
+            console.error("Failed to save assistant message to DB:", dbError);
           }
 
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));

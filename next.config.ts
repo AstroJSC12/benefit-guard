@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  serverExternalPackages: ["pdf-parse"],
+  turbopack: {
+    resolveAlias: {
+      canvas: { browser: "" },
+    },
+  },
 };
 
 export default nextConfig;

@@ -45,6 +45,46 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+
+    const updateData: Record<string, unknown> = {};
+    if (typeof body.title === "string") updateData.title = body.title;
+    if (typeof body.archived === "boolean") updateData.archived = body.archived;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    const conversation = await prisma.conversation.updateMany({
+      where: { id, userId: session.user.id },
+      data: updateData,
+    });
+
+    if (conversation.count === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Update conversation error:", error);
+    return NextResponse.json(
+      { error: "Failed to update conversation" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

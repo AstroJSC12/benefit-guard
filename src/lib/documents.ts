@@ -1,11 +1,37 @@
 import prisma from "./db";
 import { generateEmbedding } from "./openai";
 
+// Polyfill browser APIs that pdfjs-dist expects but don't exist in Node.js
+// We only extract text (not render), so empty stubs are fine
+if (typeof globalThis.DOMMatrix === "undefined") {
+  // @ts-expect-error - stub for Node.js compatibility
+  globalThis.DOMMatrix = class DOMMatrix {
+    m: number[] = [1, 0, 0, 1, 0, 0];
+    constructor() { this.m = [1, 0, 0, 1, 0, 0]; }
+    isIdentity = true;
+    translate() { return this; }
+    scale() { return this; }
+    transformPoint() { return { x: 0, y: 0 }; }
+    inverse() { return this; }
+  };
+}
+if (typeof globalThis.Path2D === "undefined") {
+  // @ts-expect-error - stub for Node.js compatibility
+  globalThis.Path2D = class Path2D {};
+}
+if (typeof globalThis.ImageData === "undefined") {
+  // @ts-expect-error - stub for Node.js compatibility
+  globalThis.ImageData = class ImageData {
+    data: Uint8ClampedArray; width: number; height: number;
+    constructor(w: number, h: number) { this.width = w; this.height = h; this.data = new Uint8ClampedArray(w * h * 4); }
+  };
+}
+
 // Chunking parameters tuned for insurance documents
 // CHUNK_SIZE: ~800 chars balances context window usage with retrieval precision
 // CHUNK_OVERLAP: 200 chars ensures we don't lose context at chunk boundaries
-const CHUNK_SIZE = 800;
-const CHUNK_OVERLAP = 200;
+const CHUNK_SIZE = 1500;
+const CHUNK_OVERLAP = 300;
 
 // Maximum file size we'll process (10MB) - larger files may timeout
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -32,17 +58,18 @@ export async function processDocument(
       data: { status: "processing" },
     });
 
-    let pdfData;
+    let rawText: string;
     try {
-      // Dynamic require to avoid SSR build issues with pdf-parse
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require("pdf-parse");
-      pdfData = await pdfParse(fileBuffer);
+      const { PDFParse } = require("pdf-parse");
+      const pdf = new PDFParse({ verbosity: 0, data: fileBuffer });
+      const result = await pdf.getText();
+      rawText = (result.text || result.pages.map((p: { text: string }) => p.text).join("\n\n"))
+        .replace(/\0/g, ""); // Strip null bytes - some PDFs embed these and Postgres rejects them
     } catch (parseError) {
+      console.error("PDF parse error:", parseError);
       throw new Error("Unable to read this PDF. It may be corrupted or password-protected.");
     }
-    
-    const rawText = pdfData.text;
     
     // Check if we actually extracted any text
     if (!rawText || rawText.trim().length < 50) {
@@ -93,11 +120,52 @@ export async function processDocument(
   }
 }
 
-function chunkText(text: string): string[] {
-  const cleanedText = text
+/**
+ * Clean extracted PDF text before chunking.
+ * Removes non-English language access sections, excessive whitespace, and noise.
+ * SBC documents are legally required to include 30+ language translations
+ * which are pure noise for an English-only app.
+ */
+function cleanExtractedText(text: string): string {
+  let cleaned = text;
+
+  // Remove language access / translation sections
+  // These typically start with a language name followed by translation text
+  // Pattern: lines that are predominantly non-ASCII (non-English translations)
+  const lines = cleaned.split("\n");
+  const filteredLines = lines.filter((line) => {
+    const trimmed = line.trim();
+    if (trimmed.length < 5) return true; // keep short lines (spacing)
+
+    // Count non-ASCII characters (non-English text)
+    const nonAsciiCount = (trimmed.match(/[^\x00-\x7F]/g) || []).length;
+    const nonAsciiRatio = nonAsciiCount / trimmed.length;
+
+    // If >30% non-ASCII, it's likely a non-English translation line
+    if (nonAsciiRatio > 0.3) return false;
+
+    // Remove common language access intro patterns
+    if (/^(Albanian|Amharic|Arabic|Armenian|Bantu|Bengali|Burmese|Cambodian|Catalan|Chamorro|Cherokee|Chinese|Chuukese|Croatian|Czech|Dutch|Farsi|French|German|Greek|Gujarati|Hawaiian|Hebrew|Hindi|Hmong|Hungarian|Igbo|Ilocano|Indonesian|Italian|Japanese|Kannada|Karen|Korean|Kurdish|Laotian|Marathi|Marshallese|Navajo|Nepali|Nilotic|Oromo|Persian|Polish|Portuguese|Punjabi|Romanian|Russian|Samoan|Serbo|Serbian|Sinhala|Slovenian|Somali|Spanish|Swahili|Tagalog|Tamil|Telugu|Thai|Tibetan|Tongan|Turkish|Ukrainian|Urdu|Vietnamese|Wolof|Yiddish|Yoruba)\s*[-–—:]/i.test(trimmed)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  cleaned = filteredLines.join("\n");
+
+  // Collapse excessive whitespace
+  cleaned = cleaned
     .replace(/\r\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
     .trim();
+
+  return cleaned;
+}
+
+function chunkText(text: string): string[] {
+  const cleanedText = cleanExtractedText(text);
 
   const words = cleanedText.split(/\s+/);
   const chunks: string[] = [];

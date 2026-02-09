@@ -31,8 +31,18 @@ export interface Provider {
   name: string;
   address: string;
   phone: string;
-  type: "urgent_care" | "hospital" | "clinic";
+  type: "urgent_care" | "hospital" | "clinic" | "pharmacy" | "dentist";
   distance?: string;
+  rating?: number;
+  totalRatings?: number;
+  openNow?: boolean;
+  googleMapsUrl?: string;
+  latitude?: number;
+  longitude?: number;
+  weekdayHours?: string[];
+  websiteUrl?: string;
+  npi?: string;
+  taxonomy?: string;
 }
 
 export interface RAGContext {
@@ -45,6 +55,8 @@ export interface RetrievedChunk {
   content: string;
   source: string;
   similarity: number;
+  documentId?: string;
+  sourceUrl?: string;
 }
 
 export type DocumentType = 

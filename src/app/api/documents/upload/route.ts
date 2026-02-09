@@ -28,16 +28,17 @@ export async function POST(request: NextRequest) {
 
     const fileType = detectDocumentType(file.name);
 
+    const buffer = Buffer.from(await file.arrayBuffer());
+
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
         fileName: file.name,
         fileType,
+        fileData: buffer,
         status: "pending",
       },
     });
-
-    const buffer = Buffer.from(await file.arrayBuffer());
 
     processDocument(document.id, buffer).catch((error) => {
       console.error("Background processing error:", error);

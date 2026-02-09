@@ -30,6 +30,7 @@ model Document {
   userId    String
   fileName  String
   fileType  String
+  fileData  Bytes?
   rawText   String?
   status    String   @default("pending")
   createdAt DateTime @default(now())
@@ -73,6 +74,7 @@ model Conversation {
   id        String    @id @default(cuid())
   userId    String
   title     String    @default("New Conversation")
+  archived  Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

@@ -12,16 +12,20 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const zipCode = searchParams.get("zipCode") || session.user.zipCode || "";
+    // Accept either 'location' (address or zip) or legacy 'zipCode' param
+    const location = searchParams.get("location") || searchParams.get("zipCode") || "";
+    const resolvedLocation = location || session.user.zipCode || "";
     const type = searchParams.get("type") as
       | "urgent_care"
       | "hospital"
       | "clinic"
+      | "pharmacy"
+      | "dentist"
       | undefined;
 
-    const providers = await findNearbyProviders(zipCode, type);
+    const providers = await findNearbyProviders(resolvedLocation, type);
 
-    return NextResponse.json(providers);
+    return NextResponse.json({ providers, location: resolvedLocation });
   } catch (error) {
     console.error("Provider search error:", error);
     return NextResponse.json(

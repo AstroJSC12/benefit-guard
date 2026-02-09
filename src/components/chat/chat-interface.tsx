@@ -3,10 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Send, Loader2, User, Bot, AlertCircle, RefreshCw } from "lucide-react";
+import { Send, Loader2, User, AlertCircle, RefreshCw, Shield } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { SourceOverlay } from "@/components/documents/source-overlay";
+import { VoiceInput } from "@/components/chat/voice-input";
+
+interface SourceRef {
+  documentId: string;
+  chunkId: string;
+}
 
 interface Message {
   id: string;
@@ -28,6 +35,7 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sourceRef, setSourceRef] = useState<SourceRef | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,6 +44,13 @@ export function ChatInterface({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Listen for focus-input event (e.g. after new chat via keyboard shortcut)
+  useEffect(() => {
+    const handleFocusInput = () => textareaRef.current?.focus();
+    window.addEventListener("bg:focus-input", handleFocusInput);
+    return () => window.removeEventListener("bg:focus-input", handleFocusInput);
+  }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -90,14 +105,13 @@ export function ChatInterface({
               try {
                 const parsed = JSON.parse(data);
                 if (parsed.content) {
-                  setMessages((prev) => {
-                    const updated = [...prev];
-                    const lastMessage = updated[updated.length - 1];
-                    if (lastMessage.role === "assistant") {
-                      lastMessage.content += parsed.content;
-                    }
-                    return updated;
-                  });
+                  setMessages((prev) =>
+                    prev.map((m, i) =>
+                      i === prev.length - 1 && m.role === "assistant"
+                        ? { ...m, content: m.content + parsed.content }
+                        : m
+                    )
+                  );
                 }
               } catch {
                 // Ignore parse errors for partial chunks
@@ -127,13 +141,20 @@ export function ChatInterface({
     }
   };
 
+  const handleTranscription = (text: string) => {
+    setInput((prev) => (prev ? `${prev} ${text}` : text));
+    textareaRef.current?.focus();
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea ref={scrollRef} className="flex-1 p-4">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-muted/20 to-background" ref={scrollRef}>
+        <div className="p-4 max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
             <div className="text-center py-12">
-              <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-7 h-7 text-primary" />
+              </div>
               <h2 className="text-xl font-semibold mb-2">
                 Welcome to BenefitGuard
               </h2>
@@ -185,6 +206,7 @@ export function ChatInterface({
           {messages.map((message) => (
             <Card
               key={message.id}
+              data-role={message.role}
               className={`p-4 ${
                 message.role === "assistant"
                   ? "bg-muted/50"
@@ -192,19 +214,58 @@ export function ChatInterface({
               }`}
             >
               <div className="flex gap-3">
-                <Avatar className="w-8 h-8 flex items-center justify-center bg-background border">
-                  {message.role === "assistant" ? (
-                    <Bot className="w-4 h-4" />
-                  ) : (
+                {message.role === "assistant" ? (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-4 h-4 text-primary" />
+                  </div>
+                ) : (
+                  <Avatar className="w-8 h-8 flex items-center justify-center bg-background border">
                     <User className="w-4 h-4" />
-                  )}
-                </Avatar>
+                  </Avatar>
+                )}
                 <div className="flex-1 space-y-2">
                   <p className="text-sm font-medium">
                     {message.role === "assistant" ? "BenefitGuard" : "You"}
                   </p>
-                  <div className="text-sm whitespace-pre-wrap">
-                    {message.content || (
+                  <div className="text-sm">
+                    {message.content ? (
+                      message.role === "assistant" ? (
+                        <div className="space-y-2">
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => <p className="my-2 leading-relaxed">{children}</p>,
+                              strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                              ul: ({ children }) => <ul className="list-disc pl-5 my-2 space-y-1">{children}</ul>,
+                              ol: ({ children }) => <ol className="list-decimal pl-5 my-2 space-y-1">{children}</ol>,
+                              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                              h1: ({ children }) => <h3 className="text-base font-semibold mt-3 mb-1">{children}</h3>,
+                              h2: ({ children }) => <h3 className="text-base font-semibold mt-3 mb-1">{children}</h3>,
+                              h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1">{children}</h3>,
+                              code: ({ children }) => <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{children}</code>,
+                              a: ({ href, children }) => {
+                                // Intercept source links to open overlay instead of navigating
+                                const sourceMatch = href?.match(/\/dashboard\/documents\/([^/]+)\/view\?chunk=(.+)/);
+                                if (sourceMatch) {
+                                  return (
+                                    <button
+                                      onClick={() => setSourceRef({ documentId: sourceMatch[1], chunkId: sourceMatch[2] })}
+                                      className="text-primary underline hover:text-primary/80 cursor-pointer inline"
+                                    >
+                                      {children}
+                                    </button>
+                                  );
+                                }
+                                return <a href={href} className="text-primary underline" target="_blank" rel="noopener noreferrer">{children}</a>;
+                              },
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                      )
+                    ) : (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Thinking...</span>
@@ -216,11 +277,11 @@ export function ChatInterface({
             </Card>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
-      <div className="border-t p-4 bg-background">
+      <div className="border-t p-4 bg-muted/30">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end">
             <Textarea
               ref={textareaRef}
               value={input}
@@ -228,6 +289,10 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder="Ask about your insurance coverage, benefits, or rights..."
               className="min-h-[60px] max-h-[200px] resize-none"
+              disabled={isLoading}
+            />
+            <VoiceInput
+              onTranscription={handleTranscription}
               disabled={isLoading}
             />
             <Button
@@ -249,6 +314,13 @@ export function ChatInterface({
           </p>
         </form>
       </div>
+      {sourceRef && (
+        <SourceOverlay
+          documentId={sourceRef.documentId}
+          chunkId={sourceRef.chunkId}
+          onClose={() => setSourceRef(null)}
+        />
+      )}
     </div>
   );
 }

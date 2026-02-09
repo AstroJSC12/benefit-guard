@@ -17,6 +17,7 @@ export async function GET() {
       select: {
         id: true,
         title: true,
+        archived: true,
         createdAt: true,
         updatedAt: true,
       },
