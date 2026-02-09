@@ -89,11 +89,12 @@ export function ProviderList() {
   // Fetch cached network statuses whenever providers or insurer change
   const fetchNetworkStatuses = useCallback(async (providerList: Provider[], insurerData: { id: string } | null) => {
     if (!insurerData) return;
-    const npis = providerList.map((p) => p.npi).filter(Boolean) as string[];
-    if (npis.length === 0) return;
+    // Build lookup keys: use NPI if available, otherwise use place:<id>
+    const keys = providerList.map((p) => p.npi || `place:${p.id}`).filter(Boolean);
+    if (keys.length === 0) return;
 
     try {
-      const params = new URLSearchParams({ npis: npis.join(","), insurerId: insurerData.id });
+      const params = new URLSearchParams({ npis: keys.join(","), insurerId: insurerData.id });
       const res = await fetch(`/api/providers/network-status?${params}`);
       if (res.ok) {
         const data = await res.json();
@@ -372,7 +373,8 @@ export function ProviderList() {
             {displayProviders.map((provider) => {
               const isExpanded = expandedId === provider.id;
               const hasDetails = provider.weekdayHours?.length || provider.websiteUrl || provider.npi || insurer;
-              const netStatus = provider.npi ? networkStatuses[provider.npi] : null;
+              const netKey = provider.npi || `place:${provider.id}`;
+              const netStatus = networkStatuses[netKey] || null;
               const isVerified = netStatus?.status === "in_network" || netStatus?.status === "out_of_network";
 
               return (
@@ -386,7 +388,7 @@ export function ProviderList() {
                         <h3 className="font-semibold truncate">{provider.name}</h3>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           {/* Network Status Badge */}
-                          {insurer && provider.npi && (
+                          {insurer && (
                             netStatus?.status === "in_network" ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                                 <ShieldCheck className="w-3 h-3" />
@@ -567,7 +569,7 @@ export function ProviderList() {
                               )}
                             </div>
                           )}
-                          {insurer && provider.npi && (
+                          {insurer && (
                             <div className="space-y-2">
                               {isVerified ? (
                                 <div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted text-xs">
@@ -603,21 +605,6 @@ export function ProviderList() {
                                 </button>
                               )}
                             </div>
-                          )}
-                          {insurer && !provider.npi && (
-                            <a
-                              href={insurer.finderUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted hover:bg-muted/80 transition-colors text-xs"
-                            >
-                              <Shield className="w-4 h-4 text-primary" />
-                              <span>
-                                <span className="font-medium">Check Network Status</span>
-                                <span className="text-muted-foreground"> on {insurer.name}</span>
-                              </span>
-                              <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
-                            </a>
                           )}
                         </div>
                       )}
@@ -674,7 +661,10 @@ export function ProviderList() {
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => verifyingProvider.npi && confirmNetworkStatus(verifyingProvider.npi, "in_network")}
+                    onClick={() => {
+                      const key = verifyingProvider.npi || `place:${verifyingProvider.id}`;
+                      confirmNetworkStatus(key, "in_network");
+                    }}
                     disabled={isSubmittingStatus}
                     className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60 transition-colors text-sm font-medium disabled:opacity-50"
                   >
@@ -682,7 +672,10 @@ export function ProviderList() {
                     In-Network
                   </button>
                   <button
-                    onClick={() => verifyingProvider.npi && confirmNetworkStatus(verifyingProvider.npi, "out_of_network")}
+                    onClick={() => {
+                      const key = verifyingProvider.npi || `place:${verifyingProvider.id}`;
+                      confirmNetworkStatus(key, "out_of_network");
+                    }}
                     disabled={isSubmittingStatus}
                     className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60 transition-colors text-sm font-medium disabled:opacity-50"
                   >
