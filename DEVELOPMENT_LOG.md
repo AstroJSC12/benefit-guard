@@ -451,13 +451,25 @@ Added `=` and `-` keys to zoom in/out on the PDF viewer (both My Documents page 
 - **Verify & Cache system** — New `NetworkStatus` Prisma model stores verified NPI + insurer combinations with `@@unique([npi, insurerId])` constraint; user-verified statuses are cached in the database and shared across all users with the same insurer
 - **Network status API** — New `/api/providers/network-status` endpoint: GET for batch NPI lookup against a specific insurer, POST for user verification (upsert pattern)
 - **Verification overlay** — Modal dialog with 2-step flow: (1) opens insurer's provider directory in new tab, (2) user confirms in-network or out-of-network; cached result immediately updates the badge
-- **Expanded card updates** — Provider cards with NPI show verified status with "Update" option; providers without NPI fall back to the original "Check Network Status" deep-link
+- **Expanded card updates** — Provider cards show verified status with "Update" option; unverified providers show "Verify Network Status" button; all providers get a badge regardless of NPI availability
 - **Architecture decision** — Chose "Verify & Cache" approach over CMS Transparency in Coverage (TIC) data because TIC MRF files are terabytes per insurer; data-source-agnostic design allows future upgrade to Turquoise Health API or TIC pipeline without changing the UI or database schema
+- **Badge fix (Feb 8)** — Initially badges only showed on providers with NPI (~5% match rate from NPPES). Fixed to show on ALL cards when insurer is detected, using `place:ID` as fallback key for providers without NPI
+- **Vercel deploy fix (Feb 8)** — `prisma.config.ts` used `env("DATABASE_URL")` which throws when the var is missing during `npm install`. Switched to `process.env.DATABASE_URL ?? ""` so `prisma generate` succeeds at build time
+
+### Phase 6: OCR for Scanned Documents (Feb 8, 2026)
+- **Scanned PDF detection** — `isLikelyScanned()` checks if pdf-parse extracted < 50 chars of text; if so, the document is likely a scanned image rather than text-based PDF
+- **OCR pipeline** — New `src/lib/ocr.ts`: converts PDF pages to images via `pdf-to-img` (pdfjs-dist + canvas rendering at 2x scale), then runs Tesseract.js OCR on each page image
+- **Seamless integration** — OCR runs automatically in the existing `processDocument()` pipeline; no user action needed. If pdf-parse fails to extract text, OCR kicks in transparently
+- **Error handling** — Descriptive messages for OCR failures: low scan quality, unreadable text, individual page failures don't kill the whole document
+- **Dependencies** — `tesseract.js` (Google's Tesseract OCR engine ported to JS, no API key needed), `pdf-to-img` (pdfjs-dist page renderer), `canvas` (node-canvas for server-side rendering)
+- **Architecture note** — Tesseract.js downloads English language data (~4MB) on first use; all processing is local, no external API calls
 
 ### Known Items to Watch
 - KB retrieval returns top 5 by similarity — monitor for redundancy with related entries (e.g., multiple No Surprises Act entries)
 - Context window cost — up to 13 doc chunks + 5 KB entries per query; manageable with GPT-4o's 128K window but worth monitoring
 - `updatedAt` on conversations doesn't refresh when new messages are sent (only on direct record updates) — could affect sidebar ordering
+- OCR processing time — Tesseract can take 5-30s per page; large scanned documents may be slow. Monitor for timeouts on Vercel serverless (10s Hobby / 60s Pro)
+- Vercel env vars — DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, OPENAI_API_KEY, GOOGLE_PLACES_API_KEY must all be set in Vercel project settings for deployment to work
 
 ---
 
