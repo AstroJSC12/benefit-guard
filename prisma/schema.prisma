@@ -95,3 +95,18 @@ model Message {
 
   @@index([conversationId])
 }
+
+model NetworkStatus {
+  id         String   @id @default(cuid())
+  npi        String
+  insurerId  String
+  status     String   // "in_network" | "out_of_network"
+  source     String   @default("user_verified") // "user_verified" | "api" | "tic_data"
+  verifiedBy String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([npi, insurerId])
+  @@index([npi])
+  @@index([insurerId])
+}

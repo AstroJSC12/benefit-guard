@@ -43,6 +43,7 @@ export interface Provider {
   websiteUrl?: string;
   npi?: string;
   taxonomy?: string;
+  networkStatus?: "in_network" | "out_of_network" | "unknown";
 }
 
 export interface RAGContext {

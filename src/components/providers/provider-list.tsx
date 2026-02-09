@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,11 @@ import {
   Shield,
   X,
   Map,
+  CheckCircle2,
+  CircleHelp,
+  ShieldCheck,
+  ShieldX,
+  ShieldQuestion,
 } from "lucide-react";
 
 type ProviderType = "all" | "urgent_care" | "hospital" | "clinic" | "pharmacy" | "dentist";
@@ -55,6 +60,9 @@ export function ProviderList() {
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [insurer, setInsurer] = useState<{ id: string; name: string; finderUrl: string } | null>(null);
+  const [networkStatuses, setNetworkStatuses] = useState<Record<string, { status: string; source: string }>>({});
+  const [verifyingProvider, setVerifyingProvider] = useState<Provider | null>(null);
+  const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
   useEffect(() => {
     fetchProviders();
@@ -77,6 +85,54 @@ export function ProviderList() {
       })
       .catch(() => {});
   }, []);
+
+  // Fetch cached network statuses whenever providers or insurer change
+  const fetchNetworkStatuses = useCallback(async (providerList: Provider[], insurerData: { id: string } | null) => {
+    if (!insurerData) return;
+    const npis = providerList.map((p) => p.npi).filter(Boolean) as string[];
+    if (npis.length === 0) return;
+
+    try {
+      const params = new URLSearchParams({ npis: npis.join(","), insurerId: insurerData.id });
+      const res = await fetch(`/api/providers/network-status?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        setNetworkStatuses(data.statuses || {});
+      }
+    } catch (err) {
+      console.error("Failed to fetch network statuses:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (providers.length > 0 && insurer) {
+      fetchNetworkStatuses(providers, insurer);
+    }
+  }, [providers, insurer, fetchNetworkStatuses]);
+
+  // User confirms a provider's network status after checking insurer directory
+  const confirmNetworkStatus = async (npi: string, status: "in_network" | "out_of_network") => {
+    if (!insurer) return;
+    setIsSubmittingStatus(true);
+    try {
+      const res = await fetch("/api/providers/network-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ npi, insurerId: insurer.id, status }),
+      });
+      if (res.ok) {
+        setNetworkStatuses((prev) => ({
+          ...prev,
+          [npi]: { status, source: "user_verified" },
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to confirm network status:", err);
+    } finally {
+      setIsSubmittingStatus(false);
+      setVerifyingProvider(null);
+    }
+  };
 
   // Client-side sort + open-now filter (avoids re-fetching from API)
   const displayProviders = useMemo(() => {
@@ -316,6 +372,8 @@ export function ProviderList() {
             {displayProviders.map((provider) => {
               const isExpanded = expandedId === provider.id;
               const hasDetails = provider.weekdayHours?.length || provider.websiteUrl || provider.npi || insurer;
+              const netStatus = provider.npi ? networkStatuses[provider.npi] : null;
+              const isVerified = netStatus?.status === "in_network" || netStatus?.status === "out_of_network";
 
               return (
                 <Card key={provider.id} className="p-4 hover:shadow-md transition-shadow">
@@ -326,9 +384,34 @@ export function ProviderList() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold truncate">{provider.name}</h3>
-                        <Badge variant={getProviderBadgeVariant(provider.type)} className="flex-shrink-0">
-                          {formatProviderType(provider.type)}
-                        </Badge>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {/* Network Status Badge */}
+                          {insurer && provider.npi && (
+                            netStatus?.status === "in_network" ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                                <ShieldCheck className="w-3 h-3" />
+                                In-Network
+                              </span>
+                            ) : netStatus?.status === "out_of_network" ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                                <ShieldX className="w-3 h-3" />
+                                Out-of-Network
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => setVerifyingProvider(provider)}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors cursor-pointer"
+                                title="Verify network status"
+                              >
+                                <ShieldQuestion className="w-3 h-3" />
+                                Verify
+                              </button>
+                            )
+                          )}
+                          <Badge variant={getProviderBadgeVariant(provider.type)}>
+                            {formatProviderType(provider.type)}
+                          </Badge>
+                        </div>
                       </div>
 
                       {/* Rating + Open/Closed */}
@@ -484,7 +567,44 @@ export function ProviderList() {
                               )}
                             </div>
                           )}
-                          {insurer && (
+                          {insurer && provider.npi && (
+                            <div className="space-y-2">
+                              {isVerified ? (
+                                <div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted text-xs">
+                                  <div className="flex items-center gap-2">
+                                    {netStatus?.status === "in_network" ? (
+                                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                    ) : (
+                                      <ShieldX className="w-4 h-4 text-red-500" />
+                                    )}
+                                    <span className="font-medium">
+                                      {netStatus?.status === "in_network" ? "In-Network" : "Out-of-Network"}
+                                    </span>
+                                    <span className="text-muted-foreground">with {insurer.name}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => setVerifyingProvider(provider)}
+                                    className="text-primary hover:underline"
+                                  >
+                                    Update
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setVerifyingProvider(provider)}
+                                  className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted hover:bg-muted/80 transition-colors text-xs w-full"
+                                >
+                                  <ShieldQuestion className="w-4 h-4 text-amber-600" />
+                                  <span>
+                                    <span className="font-medium">Verify Network Status</span>
+                                    <span className="text-muted-foreground"> with {insurer.name}</span>
+                                  </span>
+                                  <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                          {insurer && !provider.npi && (
                             <a
                               href={insurer.finderUrl}
                               target="_blank"
@@ -506,6 +626,76 @@ export function ProviderList() {
                 </Card>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Network Status Verification Overlay */}
+      {verifyingProvider && insurer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-200">
+          <div className="bg-background border rounded-xl shadow-xl max-w-md w-full mx-4 p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-lg">Verify Network Status</h3>
+              <button
+                onClick={() => setVerifyingProvider(null)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="px-3 py-2.5 rounded-md bg-muted text-sm">
+                <p className="font-medium">{verifyingProvider.name}</p>
+                <p className="text-muted-foreground text-xs mt-0.5">{verifyingProvider.address}</p>
+                {verifyingProvider.npi && (
+                  <p className="text-muted-foreground text-xs mt-0.5">NPI: {verifyingProvider.npi}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Step 1: Check if this provider is in your <strong>{insurer.name}</strong> network:
+                </p>
+                <a
+                  href={insurer.finderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-md border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-sm text-primary font-medium"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open {insurer.name} Provider Directory
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Step 2: After checking, confirm the network status:
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => verifyingProvider.npi && confirmNetworkStatus(verifyingProvider.npi, "in_network")}
+                    disabled={isSubmittingStatus}
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60 transition-colors text-sm font-medium disabled:opacity-50"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    In-Network
+                  </button>
+                  <button
+                    onClick={() => verifyingProvider.npi && confirmNetworkStatus(verifyingProvider.npi, "out_of_network")}
+                    disabled={isSubmittingStatus}
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60 transition-colors text-sm font-medium disabled:opacity-50"
+                  >
+                    <ShieldX className="w-4 h-4" />
+                    Out-of-Network
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Your verification helps other {insurer.name} members see this provider&apos;s network status.
+              </p>
+            </div>
           </div>
         </div>
       )}
