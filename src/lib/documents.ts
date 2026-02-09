@@ -1,5 +1,6 @@
 import prisma from "./db";
 import { generateEmbedding } from "./openai";
+import { isLikelyScanned, ocrPdfBuffer } from "./ocr";
 
 // Polyfill browser APIs that pdfjs-dist expects but don't exist in Node.js
 // We only extract text (not render), so empty stubs are fine
@@ -71,9 +72,27 @@ export async function processDocument(
       throw new Error("Unable to read this PDF. It may be corrupted or password-protected.");
     }
     
-    // Check if we actually extracted any text
-    if (!rawText || rawText.trim().length < 50) {
-      throw new Error("Could not extract text from this PDF. It may be a scanned image - we don't support OCR yet.");
+    // Check if we actually extracted any text — if not, try OCR
+    if (isLikelyScanned(rawText)) {
+      console.log(`Document ${documentId}: Low text extraction (${rawText?.trim().length || 0} chars), attempting OCR...`);
+      try {
+        rawText = await ocrPdfBuffer(fileBuffer);
+        console.log(`Document ${documentId}: OCR extracted ${rawText.length} chars`);
+      } catch (ocrError) {
+        console.error(`Document ${documentId}: OCR failed:`, ocrError);
+        throw new Error(
+          "Could not extract text from this PDF. It appears to be a scanned document " +
+          "and OCR was unable to read it. Try uploading a higher quality scan."
+        );
+      }
+
+      // Verify OCR produced enough text
+      if (isLikelyScanned(rawText)) {
+        throw new Error(
+          "OCR could not extract enough readable text from this scanned PDF. " +
+          "The scan quality may be too low — try rescanning at a higher resolution."
+        );
+      }
     }
 
     await prisma.document.update({
