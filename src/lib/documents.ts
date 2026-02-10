@@ -5,33 +5,6 @@ import { isLikelyScanned, ocrPdfBuffer } from "./ocr";
 // NOTE: Browser API polyfills (DOMMatrix, Path2D, ImageData) are in src/instrumentation.ts
 // They must run before pdfjs-dist loads, and on Vercel external packages load before app code.
 
-import path from "path";
-
-// Lazy-load pdfjs-dist at runtime only — avoids build-time evaluation issues on Vercel.
-// pdfjs-dist v5 requires a worker file path; we resolve it once on first call.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _getDocument: any = null;
-function getPdfjs() {
-  if (!_getDocument) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfjs = require("pdfjs-dist/legacy/build/pdf.mjs");
-    // Build the worker path from cwd — require.resolve gets transformed by Vercel's
-    // bundler into a numeric module ID, so we construct the path manually.
-    // On Vercel: cwd = /var/task, pdfjs-dist is in node_modules (serverExternalPackages).
-    const workerPath = path.join(
-      process.cwd(),
-      "node_modules",
-      "pdfjs-dist",
-      "legacy",
-      "build",
-      "pdf.worker.mjs"
-    );
-    pdfjs.GlobalWorkerOptions.workerSrc = workerPath;
-    _getDocument = pdfjs.getDocument;
-  }
-  return _getDocument;
-}
-
 // Chunking parameters tuned for insurance documents
 // CHUNK_SIZE: ~800 chars balances context window usage with retrieval precision
 // CHUNK_OVERLAP: 200 chars ensures we don't lose context at chunk boundaries
@@ -65,28 +38,10 @@ export async function processDocument(
 
     let rawText: string;
     try {
-      const data = new Uint8Array(fileBuffer);
-      const getDocument = getPdfjs();
-      const doc = await getDocument({
-        data,
-        useWorkerFetch: false,
-        isEvalSupported: false,
-        useSystemFonts: false,
-        verbosity: 0,
-      }).promise;
-
-      const pageTexts: string[] = [];
-      for (let i = 1; i <= doc.numPages; i++) {
-        const page = await doc.getPage(i);
-        const content = await page.getTextContent();
-        const text = content.items
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((item: any) => typeof item.str === "string")
-          .map((item: any) => item.str as string)
-          .join(" ");
-        pageTexts.push(text);
-      }
-      rawText = pageTexts.join("\n\n").replace(/\0/g, ""); // Strip null bytes
+      // unpdf: serverless-native PDF text extraction — no worker configuration needed.
+      const { extractText } = await import("unpdf");
+      const result = await extractText(new Uint8Array(fileBuffer));
+      rawText = (result.text || []).join("\n\n").replace(/\0/g, ""); // Strip null bytes
     } catch (parseError) {
       console.error("PDF parse error:", parseError);
       const detail = parseError instanceof Error ? parseError.message : String(parseError);

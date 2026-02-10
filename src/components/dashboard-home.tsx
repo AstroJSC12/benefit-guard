@@ -286,7 +286,7 @@ export function DashboardHome() {
                     </div>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        doc.status === "processed"
+                        doc.status === "completed"
                           ? "bg-chart-2/10 text-chart-2"
                           : doc.status === "processing"
                           ? "bg-chart-4/10 text-chart-4"
@@ -295,7 +295,7 @@ export function DashboardHome() {
                           : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {doc.status === "processed"
+                      {doc.status === "completed"
                         ? "Ready"
                         : doc.status === "processing"
                         ? "Processing"

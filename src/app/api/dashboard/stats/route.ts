@@ -42,7 +42,7 @@ export async function GET() {
       }),
     ]);
 
-    const processedDocs = documents.filter((d) => d.status === "processed");
+    const processedDocs = documents.filter((d) => d.status === "completed");
 
     return NextResponse.json({
       user: {
