@@ -2,31 +2,8 @@ import prisma from "./db";
 import { generateEmbeddings } from "./openai";
 import { isLikelyScanned, ocrPdfBuffer } from "./ocr";
 
-// Polyfill browser APIs that pdfjs-dist expects but don't exist in Node.js
-// We only extract text (not render), so empty stubs are fine
-if (typeof globalThis.DOMMatrix === "undefined") {
-  // @ts-expect-error - stub for Node.js compatibility
-  globalThis.DOMMatrix = class DOMMatrix {
-    m: number[] = [1, 0, 0, 1, 0, 0];
-    constructor() { this.m = [1, 0, 0, 1, 0, 0]; }
-    isIdentity = true;
-    translate() { return this; }
-    scale() { return this; }
-    transformPoint() { return { x: 0, y: 0 }; }
-    inverse() { return this; }
-  };
-}
-if (typeof globalThis.Path2D === "undefined") {
-  // @ts-expect-error - stub for Node.js compatibility
-  globalThis.Path2D = class Path2D {};
-}
-if (typeof globalThis.ImageData === "undefined") {
-  // @ts-expect-error - stub for Node.js compatibility
-  globalThis.ImageData = class ImageData {
-    data: Uint8ClampedArray; width: number; height: number;
-    constructor(w: number, h: number) { this.width = w; this.height = h; this.data = new Uint8ClampedArray(w * h * 4); }
-  };
-}
+// NOTE: Browser API polyfills (DOMMatrix, Path2D, ImageData) are in src/instrumentation.ts
+// They must run before pdf-parse loads, and on Vercel external packages load before app code.
 
 // Chunking parameters tuned for insurance documents
 // CHUNK_SIZE: ~800 chars balances context window usage with retrieval precision
