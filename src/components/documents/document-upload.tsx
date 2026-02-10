@@ -103,12 +103,20 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
           setUploads((prev) =>
             prev.map((u) =>
               u.id === tempId
-                ? { ...document, status: "processing" as const }
+                ? { ...document }
                 : u
             )
           );
 
-          pollDocumentStatus(document.id, tempId);
+          if (document.status === "completed") {
+            toast.success(`${document.fileName} processed successfully`);
+            onUploadComplete?.();
+          } else if (document.status === "error") {
+            toast.error(`Failed to process ${file.name}: ${document.errorMessage || "Unknown error"}`);
+          } else {
+            // Still processing — poll for completion
+            pollDocumentStatus(document.id, tempId);
+          }
         } else {
           const errorData = await response.json().catch(() => ({}));
           const errorMsg = errorData.error || "Upload failed. Please try again.";

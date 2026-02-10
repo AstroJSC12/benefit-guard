@@ -42,11 +42,14 @@ export async function POST(request: NextRequest) {
 
     // Process synchronously — keeps the serverless function alive until done.
     // With batch embeddings this typically takes 2-5 seconds.
+    let processingErrorMsg: string | undefined;
     try {
       await processDocument(document.id, buffer);
     } catch (processingError) {
       console.error("Document processing error:", processingError);
-      // Return the document even if processing failed — user can see the error
+      processingErrorMsg = processingError instanceof Error 
+        ? processingError.message 
+        : String(processingError);
     }
 
     // Re-fetch to get the final status (completed or error)
@@ -55,11 +58,14 @@ export async function POST(request: NextRequest) {
       select: { id: true, fileName: true, fileType: true, status: true },
     });
 
-    return NextResponse.json(updated || {
-      id: document.id,
-      fileName: document.fileName,
-      fileType: document.fileType,
-      status: "error",
+    return NextResponse.json({
+      ...(updated || {
+        id: document.id,
+        fileName: document.fileName,
+        fileType: document.fileType,
+        status: "error",
+      }),
+      ...(processingErrorMsg && { errorMessage: processingErrorMsg }),
     });
   } catch (error) {
     console.error("Upload error:", error);

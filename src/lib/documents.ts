@@ -128,16 +128,20 @@ export async function processDocument(
     });
   } catch (error) {
     console.error("Document processing error:", error);
-    // Store the error message for user visibility
     const errorMessage = error instanceof Error ? error.message : "Unknown processing error";
-    await prisma.document.update({
-      where: { id: documentId },
-      data: { 
-        status: "error",
-        // Note: If you want to store error details, add an errorMessage field to the schema
-      },
-    });
-    // Don't rethrow - this runs async and there's no caller to catch it
+    try {
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { 
+          status: "error",
+          rawText: `ERROR: ${errorMessage}`,
+        },
+      });
+    } catch (dbError) {
+      console.error("Failed to update error status:", dbError);
+    }
+    // Rethrow so the caller can capture the error message
+    throw error;
   }
 }
 
