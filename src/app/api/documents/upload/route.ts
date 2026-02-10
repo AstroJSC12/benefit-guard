@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { after } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
@@ -41,27 +40,31 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // after() keeps the serverless function alive after the response is sent.
-    // Without this, Vercel freezes the function immediately and processDocument
-    // never completes. This is the Next.js-recommended pattern for background work.
-    after(async () => {
-      try {
-        await processDocument(document.id, buffer);
-      } catch (error) {
-        console.error("Background processing error:", error);
-      }
+    // Process synchronously — keeps the serverless function alive until done.
+    // With batch embeddings this typically takes 2-5 seconds.
+    try {
+      await processDocument(document.id, buffer);
+    } catch (processingError) {
+      console.error("Document processing error:", processingError);
+      // Return the document even if processing failed — user can see the error
+    }
+
+    // Re-fetch to get the final status (completed or error)
+    const updated = await prisma.document.findUnique({
+      where: { id: document.id },
+      select: { id: true, fileName: true, fileType: true, status: true },
     });
 
-    return NextResponse.json({
+    return NextResponse.json(updated || {
       id: document.id,
       fileName: document.fileName,
       fileType: document.fileType,
-      status: document.status,
+      status: "error",
     });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload document" },
+      { error: error instanceof Error ? error.message : "Failed to upload document" },
       { status: 500 }
     );
   }
