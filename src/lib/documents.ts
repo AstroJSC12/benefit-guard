@@ -5,6 +5,8 @@ import { isLikelyScanned, ocrPdfBuffer } from "./ocr";
 // NOTE: Browser API polyfills (DOMMatrix, Path2D, ImageData) are in src/instrumentation.ts
 // They must run before pdfjs-dist loads, and on Vercel external packages load before app code.
 
+import path from "path";
+
 // Lazy-load pdfjs-dist at runtime only — avoids build-time evaluation issues on Vercel.
 // pdfjs-dist v5 requires a worker file path; we resolve it once on first call.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,10 +15,18 @@ function getPdfjs() {
   if (!_getDocument) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pdfjs = require("pdfjs-dist/legacy/build/pdf.mjs");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
-      "pdfjs-dist/legacy/build/pdf.worker.mjs"
+    // Build the worker path from cwd — require.resolve gets transformed by Vercel's
+    // bundler into a numeric module ID, so we construct the path manually.
+    // On Vercel: cwd = /var/task, pdfjs-dist is in node_modules (serverExternalPackages).
+    const workerPath = path.join(
+      process.cwd(),
+      "node_modules",
+      "pdfjs-dist",
+      "legacy",
+      "build",
+      "pdf.worker.mjs"
     );
+    pdfjs.GlobalWorkerOptions.workerSrc = workerPath;
     _getDocument = pdfjs.getDocument;
   }
   return _getDocument;
