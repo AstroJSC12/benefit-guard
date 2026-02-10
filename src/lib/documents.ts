@@ -46,7 +46,8 @@ export async function processDocument(
         .replace(/\0/g, ""); // Strip null bytes - some PDFs embed these and Postgres rejects them
     } catch (parseError) {
       console.error("PDF parse error:", parseError);
-      throw new Error("Unable to read this PDF. It may be corrupted or password-protected.");
+      const detail = parseError instanceof Error ? parseError.message : String(parseError);
+      throw new Error(`PDF parse failed: ${detail}`);
     }
     
     // Check if we actually extracted any text — if not, try OCR
