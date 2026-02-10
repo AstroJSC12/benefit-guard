@@ -23,24 +23,53 @@ import { Input } from "@/components/ui/input";
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-// Fix text layer rendering — make text invisible by default (it's only for selection/search),
-// and use mix-blend-mode for highlights so they blend with the canvas instead of covering it.
+// Nuclear fix for text layer + annotation layer rendering.
+// The text layer is an INVISIBLE overlay used only for text selection and search.
+// The annotation layer renders PDF links/form fields.
+// Without these overrides, both layers show colored text and backgrounds
+// that overlap with the canvas-rendered PDF, creating visual artifacts.
 const textLayerStyles = `
-  .react-pdf__Page__textContent.textLayer span {
+  /* Make ALL text layer content invisible — it exists only for selection/search */
+  .react-pdf__Page__textContent.textLayer,
+  .react-pdf__Page__textContent.textLayer * {
     color: transparent !important;
-    mix-blend-mode: multiply;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    text-decoration: none !important;
+    -webkit-text-stroke: 0 !important;
   }
-  .react-pdf__Page__textContent.textLayer span::selection {
-    background: rgba(0, 100, 255, 0.3);
-    color: transparent;
+  .react-pdf__Page__textContent.textLayer *::selection {
+    background: rgba(0, 100, 255, 0.3) !important;
+    color: transparent !important;
   }
+
+  /* Hide annotation layer link highlights — they show colored boxes over hyperlinks */
+  .react-pdf__Page__annotations.annotationLayer,
+  .react-pdf__Page__annotations.annotationLayer * {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: transparent !important;
+  }
+  .react-pdf__Page__annotations.annotationLayer a,
+  .react-pdf__Page__annotations.annotationLayer .linkAnnotation {
+    background: transparent !important;
+  }
+  /* Keep link hover areas clickable but invisible */
+  .react-pdf__Page__annotations.annotationLayer a:hover {
+    background: rgba(0, 100, 255, 0.08) !important;
+    cursor: pointer;
+  }
+
+  /* Search highlight styles — only visible elements in the text layer */
   .react-pdf__Page__textContent.textLayer .highlight {
-    background: rgba(255, 200, 0, 0.4) !important;
+    background: rgba(255, 200, 0, 0.45) !important;
     mix-blend-mode: multiply;
     border-radius: 2px;
   }
   .react-pdf__Page__textContent.textLayer .highlight-active {
-    background: rgba(255, 120, 0, 0.6) !important;
+    background: rgba(255, 120, 0, 0.65) !important;
     mix-blend-mode: multiply;
     border-radius: 2px;
   }
