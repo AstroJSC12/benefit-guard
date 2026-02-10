@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
@@ -40,8 +41,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    processDocument(document.id, buffer).catch((error) => {
-      console.error("Background processing error:", error);
+    // after() keeps the serverless function alive after the response is sent.
+    // Without this, Vercel freezes the function immediately and processDocument
+    // never completes. This is the Next.js-recommended pattern for background work.
+    after(async () => {
+      try {
+        await processDocument(document.id, buffer);
+      } catch (error) {
+        console.error("Background processing error:", error);
+      }
     });
 
     return NextResponse.json({

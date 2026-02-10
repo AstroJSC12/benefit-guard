@@ -225,21 +225,41 @@ export function ProviderList() {
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
-    const hasHalf = rating - fullStars >= 0.25;
+    const fraction = rating - fullStars; // e.g. 4.7 → 0.7
+
     return (
       <div className="flex items-center gap-0.5">
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star
-            key={i}
-            className={`w-3.5 h-3.5 ${
-              i < fullStars
-                ? "fill-amber-400 text-amber-400"
-                : i === fullStars && hasHalf
-                  ? "fill-amber-400/50 text-amber-400"
-                  : "text-muted-foreground/30"
-            }`}
-          />
-        ))}
+        {Array.from({ length: 5 }, (_, i) => {
+          if (i < fullStars) {
+            // Fully filled star
+            return <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />;
+          }
+          if (i === fullStars && fraction > 0) {
+            // Partially filled star using SVG gradient
+            const pct = Math.round(fraction * 100);
+            const gradId = `star-grad-${pct}`;
+            return (
+              <svg key={i} viewBox="0 0 24 24" className="w-3.5 h-3.5">
+                <defs>
+                  <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
+                    <stop offset={`${pct}%`} stopColor="#fbbf24" />
+                    <stop offset={`${pct}%`} stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+                <polygon
+                  points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                  fill={`url(#${gradId})`}
+                  stroke="#fbbf24"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </svg>
+            );
+          }
+          // Empty star
+          return <Star key={i} className="w-3.5 h-3.5 text-muted-foreground/30" />;
+        })}
       </div>
     );
   };
@@ -387,28 +407,18 @@ export function ProviderList() {
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold truncate">{provider.name}</h3>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {/* Network Status Badge */}
-                          {insurer && (
-                            netStatus?.status === "in_network" ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                                <ShieldCheck className="w-3 h-3" />
-                                In-Network
-                              </span>
-                            ) : netStatus?.status === "out_of_network" ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">
-                                <ShieldX className="w-3 h-3" />
-                                Out-of-Network
-                              </span>
-                            ) : (
-                              <button
-                                onClick={() => setVerifyingProvider(provider)}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors cursor-pointer"
-                                title="Verify network status"
-                              >
-                                <ShieldQuestion className="w-3 h-3" />
-                                Verify
-                              </button>
-                            )
+                          {/* Network Status Badge — only shown when we have confirmed data */}
+                          {insurer && netStatus?.status === "in_network" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                              <ShieldCheck className="w-3 h-3" />
+                              In-Network
+                            </span>
+                          )}
+                          {insurer && netStatus?.status === "out_of_network" && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                              <ShieldX className="w-3 h-3" />
+                              Out-of-Network
+                            </span>
                           )}
                           <Badge variant={getProviderBadgeVariant(provider.type)}>
                             {formatProviderType(provider.type)}
@@ -582,7 +592,11 @@ export function ProviderList() {
                                     <span className="font-medium">
                                       {netStatus?.status === "in_network" ? "In-Network" : "Out-of-Network"}
                                     </span>
-                                    <span className="text-muted-foreground">with {insurer.name}</span>
+                                    <span className="text-muted-foreground">
+                                      with {insurer.name}
+                                      {netStatus?.source === "tic_data" && " · via insurance data"}
+                                      {netStatus?.source === "user_verified" && " · verified by users"}
+                                    </span>
                                   </div>
                                   <button
                                     onClick={() => setVerifyingProvider(provider)}

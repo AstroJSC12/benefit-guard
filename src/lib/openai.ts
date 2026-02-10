@@ -43,6 +43,27 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
+ * Generate embeddings for multiple texts in a single API call.
+ * Much faster than calling generateEmbedding() in a loop — one round trip
+ * instead of N. Critical for serverless environments with tight timeouts.
+ */
+export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key not configured");
+  }
+
+  const response = await openai.embeddings.create({
+    model: "text-embedding-ada-002",
+    input: texts,
+  });
+
+  // OpenAI returns embeddings in the same order as inputs
+  return response.data
+    .sort((a, b) => a.index - b.index)
+    .map((item) => item.embedding);
+}
+
+/**
  * Generate a chat completion.
  * 
  * Note: This helper is currently unused - the chat API route calls openai directly
