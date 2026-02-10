@@ -3,7 +3,24 @@ import { generateEmbeddings } from "./openai";
 import { isLikelyScanned, ocrPdfBuffer } from "./ocr";
 
 // NOTE: Browser API polyfills (DOMMatrix, Path2D, ImageData) are in src/instrumentation.ts
-// They must run before pdf-parse loads, and on Vercel external packages load before app code.
+// They must run before pdfjs-dist loads, and on Vercel external packages load before app code.
+
+// Lazy-load pdfjs-dist at runtime only — avoids build-time evaluation issues on Vercel.
+// pdfjs-dist v5 requires a worker file path; we resolve it once on first call.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _getDocument: any = null;
+function getPdfjs() {
+  if (!_getDocument) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfjs = require("pdfjs-dist/legacy/build/pdf.mjs");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs"
+    );
+    _getDocument = pdfjs.getDocument;
+  }
+  return _getDocument;
+}
 
 // Chunking parameters tuned for insurance documents
 // CHUNK_SIZE: ~800 chars balances context window usage with retrieval precision
@@ -38,12 +55,28 @@ export async function processDocument(
 
     let rawText: string;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { PDFParse } = require("pdf-parse");
-      const pdf = new PDFParse({ verbosity: 0, data: fileBuffer });
-      const result = await pdf.getText();
-      rawText = (result.text || result.pages.map((p: { text: string }) => p.text).join("\n\n"))
-        .replace(/\0/g, ""); // Strip null bytes - some PDFs embed these and Postgres rejects them
+      const data = new Uint8Array(fileBuffer);
+      const getDocument = getPdfjs();
+      const doc = await getDocument({
+        data,
+        useWorkerFetch: false,
+        isEvalSupported: false,
+        useSystemFonts: false,
+        verbosity: 0,
+      }).promise;
+
+      const pageTexts: string[] = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const content = await page.getTextContent();
+        const text = content.items
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((item: any) => typeof item.str === "string")
+          .map((item: any) => item.str as string)
+          .join(" ");
+        pageTexts.push(text);
+      }
+      rawText = pageTexts.join("\n\n").replace(/\0/g, ""); // Strip null bytes
     } catch (parseError) {
       console.error("PDF parse error:", parseError);
       const detail = parseError instanceof Error ? parseError.message : String(parseError);
