@@ -23,6 +23,29 @@ import { Input } from "@/components/ui/input";
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+// Fix text layer rendering — make text invisible by default (it's only for selection/search),
+// and use mix-blend-mode for highlights so they blend with the canvas instead of covering it.
+const textLayerStyles = `
+  .react-pdf__Page__textContent.textLayer span {
+    color: transparent !important;
+    mix-blend-mode: multiply;
+  }
+  .react-pdf__Page__textContent.textLayer span::selection {
+    background: rgba(0, 100, 255, 0.3);
+    color: transparent;
+  }
+  .react-pdf__Page__textContent.textLayer .highlight {
+    background: rgba(255, 200, 0, 0.4) !important;
+    mix-blend-mode: multiply;
+    border-radius: 2px;
+  }
+  .react-pdf__Page__textContent.textLayer .highlight-active {
+    background: rgba(255, 120, 0, 0.6) !important;
+    mix-blend-mode: multiply;
+    border-radius: 2px;
+  }
+`;
+
 interface PdfViewerProps {
   url: string;
   fileName?: string;
@@ -117,8 +140,7 @@ export function PdfViewer({ url, fileName = "document.pdf", initialSearch }: Pdf
     // Clear previous highlights
     textSpans.forEach((span) => {
       const el = span as HTMLElement;
-      el.style.backgroundColor = "";
-      el.style.borderRadius = "";
+      el.classList.remove("highlight", "highlight-active");
     });
 
     if (!searchQuery.trim()) {
@@ -134,8 +156,7 @@ export function PdfViewer({ url, fileName = "document.pdf", initialSearch }: Pdf
     textSpans.forEach((span) => {
       const el = span as HTMLElement;
       if (el.textContent?.toLowerCase().includes(query)) {
-        el.style.backgroundColor = "rgba(255, 200, 0, 0.35)";
-        el.style.borderRadius = "2px";
+        el.classList.add("highlight");
         matches.push(el);
       }
     });
@@ -146,7 +167,8 @@ export function PdfViewer({ url, fileName = "document.pdf", initialSearch }: Pdf
 
     // Highlight and scroll to first match
     if (matches.length > 0) {
-      matches[0].style.backgroundColor = "rgba(255, 120, 0, 0.6)";
+      matches[0].classList.remove("highlight");
+      matches[0].classList.add("highlight-active");
       matches[0].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [searchQuery, numPages]);
@@ -156,15 +178,17 @@ export function PdfViewer({ url, fileName = "document.pdf", initialSearch }: Pdf
     const matches = matchElements.current;
     if (matches.length === 0 || currentMatch === 0) return;
 
-    // Reset all to yellow
+    // Reset all to default highlight
     matches.forEach((el) => {
-      el.style.backgroundColor = "rgba(255, 200, 0, 0.35)";
+      el.classList.remove("highlight-active");
+      el.classList.add("highlight");
     });
 
-    // Highlight focused match in orange
+    // Highlight focused match
     const idx = currentMatch - 1;
     if (matches[idx]) {
-      matches[idx].style.backgroundColor = "rgba(255, 120, 0, 0.6)";
+      matches[idx].classList.remove("highlight");
+      matches[idx].classList.add("highlight-active");
       matches[idx].scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [currentMatch]);
@@ -200,6 +224,9 @@ export function PdfViewer({ url, fileName = "document.pdf", initialSearch }: Pdf
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Text layer highlight styles */}
+      <style dangerouslySetInnerHTML={{ __html: textLayerStyles }} />
+
       {/* Custom toolbar */}
       <div className="flex items-center gap-1 px-3 py-2.5 bg-muted/60 border-b flex-shrink-0">
         {/* Page navigation */}

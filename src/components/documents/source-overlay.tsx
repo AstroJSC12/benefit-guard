@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { X, FileText, Quote, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
@@ -89,6 +89,41 @@ export function SourceOverlay({ documentId, chunkId, onClose }: SourceOverlayPro
   const [hasPdf, setHasPdf] = useState(true);
   const [pdfSearch, setPdfSearch] = useState<string | undefined>(undefined);
 
+  // Draggable split pane state
+  const [excerptHeight, setExcerptHeight] = useState(200);
+  const isDragging = useRef(false);
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(0);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    dragStartY.current = e.clientY;
+    dragStartHeight.current = excerptHeight;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  }, [excerptHeight]);
+
+  useEffect(() => {
+    const handleDragMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      const delta = e.clientY - dragStartY.current;
+      const newHeight = Math.max(80, Math.min(500, dragStartHeight.current + delta));
+      setExcerptHeight(newHeight);
+    };
+    const handleDragEnd = () => {
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", handleDragMove);
+    window.addEventListener("mouseup", handleDragEnd);
+    return () => {
+      window.removeEventListener("mousemove", handleDragMove);
+      window.removeEventListener("mouseup", handleDragEnd);
+    };
+  }, []);
+
   useEffect(() => {
     fetch(`/api/documents/${documentId}/chunk/${chunkId}`)
       .then((res) => res.json())
@@ -166,7 +201,10 @@ export function SourceOverlay({ documentId, chunkId, onClose }: SourceOverlayPro
             </div>
           </div>
         ) : excerpt ? (
-          <div className="border-b bg-primary/5 p-4 flex-shrink-0 max-h-52 overflow-y-auto">
+          <div
+            className="border-b bg-primary/5 p-4 flex-shrink-0 overflow-y-auto"
+            style={{ height: excerptHeight }}
+          >
             <div className="flex items-start gap-3">
               <Quote className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
@@ -224,6 +262,16 @@ export function SourceOverlay({ documentId, chunkId, onClose }: SourceOverlayPro
             </div>
           </div>
         ) : null}
+
+        {/* Drag handle — only show when excerpt is visible */}
+        {!loading && excerpt && (
+          <div
+            className="flex-shrink-0 h-2 bg-border/50 hover:bg-primary/30 cursor-row-resize flex items-center justify-center transition-colors group"
+            onMouseDown={handleDragStart}
+          >
+            <div className="w-8 h-0.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary/60 transition-colors" />
+          </div>
+        )}
 
         {/* PDF viewer */}
         <div className="flex-1 min-h-0">
