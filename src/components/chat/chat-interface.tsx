@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Send, Loader2, User, AlertCircle, RefreshCw, Shield } from "lucide-react";
+import { Send, Loader2, User, AlertCircle, RefreshCw, Shield, Paperclip, X, ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { SourceOverlay } from "@/components/documents/source-overlay";
 import { VoiceInput } from "@/components/chat/voice-input";
@@ -19,6 +19,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
   createdAt?: Date;
 }
 
@@ -36,8 +37,10 @@ export function ChatInterface({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sourceRef, setSourceRef] = useState<SourceRef | null>(null);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -52,18 +55,54 @@ export function ChatInterface({
     return () => window.removeEventListener("bg:focus-input", handleFocusInput);
   }, []);
 
+  const processImageFile = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 4 * 1024 * 1024) {
+      setErrorMessage("Image is too large (max 4MB). Please use a smaller screenshot.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPendingImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) processImageFile(file);
+        return;
+      }
+    }
+  }, [processImageFile]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+    // Reset so the same file can be re-selected
+    e.target.value = "";
+  }, [processImageFile]);
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !pendingImage) || isLoading) return;
 
+    const imageToSend = pendingImage;
     const userMessage: Message = {
       id: `temp-${Date.now()}`,
       role: "user",
-      content: input.trim(),
+      content: input.trim() || (imageToSend ? "[Image]" : ""),
+      imageUrl: imageToSend || undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setPendingImage(null);
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -79,12 +118,16 @@ export function ChatInterface({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: userMessage.content !== "[Image]" ? userMessage.content : "",
           conversationId,
+          ...(imageToSend ? { image: imageToSend } : {}),
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to send message");
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => null);
+        throw new Error(errBody?.error || "Failed to send message");
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -121,14 +164,11 @@ export function ChatInterface({
         }
       }
     } catch (error) {
-      console.error("Chat error:", error);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("Chat error message:", msg);
       // Remove the empty assistant message on error
       setMessages((prev) => prev.filter((m) => m.content !== ""));
-      // Set a user-friendly error message
-      const errorMsg = error instanceof Error && error.message.includes("Failed to send")
-        ? "Unable to reach BenefitGuard. Please check your connection and try again."
-        : "Something went wrong while processing your message. Please try again.";
-      setErrorMessage(errorMsg);
+      setErrorMessage(msg || "Something went wrong while processing your message. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -263,7 +303,21 @@ export function ChatInterface({
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
+                        <div>
+                          {message.imageUrl && (
+                            <div className="mb-2">
+                              <img
+                                src={message.imageUrl}
+                                alt="Attached image"
+                                className="max-w-[300px] max-h-[300px] rounded-lg border object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(message.imageUrl, "_blank")}
+                              />
+                            </div>
+                          )}
+                          {message.content && message.content !== "[Image]" && (
+                            <div className="whitespace-pre-wrap">{message.content}</div>
+                          )}
+                        </div>
                       )
                     ) : (
                       <div className="flex items-center gap-2 text-muted-foreground">
@@ -281,16 +335,55 @@ export function ChatInterface({
 
       <div className="border-t p-4 bg-muted/30">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+          {pendingImage && (
+            <div className="mb-2 inline-flex items-start gap-1 p-2 rounded-lg border bg-background">
+              <img
+                src={pendingImage}
+                alt="Pending upload"
+                className="max-w-[120px] max-h-[80px] rounded object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setPendingImage(null)}
+                className="p-0.5 rounded-full hover:bg-muted transition-colors flex-shrink-0"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+          )}
           <div className="flex gap-2 items-end">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about your insurance coverage, benefits, or rights..."
-              className="min-h-[60px] max-h-[200px] resize-none"
-              disabled={isLoading}
-            />
+            <div className="relative flex-1">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                placeholder={pendingImage ? "Add a message about this image, or just send it..." : "Ask about your insurance coverage, benefits, or rights..."}
+                className="min-h-[60px] max-h-[200px] resize-none pr-10"
+                disabled={isLoading}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute right-2 bottom-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Attach an image (or paste one with Ctrl+V)"
+                disabled={isLoading}
+              >
+                {pendingImage ? (
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                ) : (
+                  <Paperclip className="w-4 h-4" />
+                )}
+              </button>
+            </div>
             <VoiceInput
               onTranscription={handleTranscription}
               disabled={isLoading}
@@ -299,7 +392,7 @@ export function ChatInterface({
               type="submit"
               size="icon"
               className="h-[60px] w-[60px]"
-              disabled={!input.trim() || isLoading}
+              disabled={(!input.trim() && !pendingImage) || isLoading}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -310,7 +403,7 @@ export function ChatInterface({
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
             BenefitGuard provides information about insurance coverage, not
-            medical advice.
+            medical advice. You can paste or attach screenshots of insurance documents.
           </p>
         </form>
       </div>

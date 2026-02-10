@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, conversationId } = await request.json();
+    const { message, conversationId, image } = await request.json();
 
-    if (!message || !conversationId) {
+    if ((!message && !image) || !conversationId) {
       return new Response(
         JSON.stringify({ error: "Missing required information. Please refresh and try again." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Sanity check: don't process empty or excessively long messages
-    const trimmedMessage = message.trim();
-    if (trimmedMessage.length === 0) {
+    const trimmedMessage = (message || "").trim();
+    if (trimmedMessage.length === 0 && !image) {
       return new Response(
         JSON.stringify({ error: "Please enter a message" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
@@ -38,6 +38,22 @@ export async function POST(request: NextRequest) {
         JSON.stringify({ error: "Message is too long. Please shorten your message." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
+    }
+
+    // Validate image if provided (must be a data URI, max ~4MB base64)
+    if (image) {
+      if (!image.startsWith("data:image/")) {
+        return new Response(
+          JSON.stringify({ error: "Invalid image format. Please try a different image." }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      if (image.length > 5_500_000) {
+        return new Response(
+          JSON.stringify({ error: "Image is too large. Please use a smaller screenshot." }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const conversation = await prisma.conversation.findFirst({
@@ -56,7 +72,8 @@ export async function POST(request: NextRequest) {
       data: {
         conversationId,
         role: "user",
-        content: message,
+        content: message || "[Image]",
+        ...(image ? { imageUrl: image } : {}),
       },
     });
 
@@ -91,15 +108,47 @@ export async function POST(request: NextRequest) {
       ? `${SYSTEM_PROMPT}\n\n=== THE USER'S ACTUAL PLAN DOCUMENTS AND KNOWLEDGE BASE ===\nUse the following information to answer the user's question. Cite specific details. For user documents, include [View Source] links. For laws and regulations, include [Official Source] links. Both link types are provided in the context below.\n\n${contextPrompt}`
       : SYSTEM_PROMPT;
 
-    const chatHistory = conversation.messages.map((m: { role: string; content: string }) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chatHistory = conversation.messages.map((m: any) => {
+      if (m.imageUrl && m.role === "user") {
+        // Multimodal message from history — include the image
+        return {
+          role: m.role as "user",
+          content: [
+            ...(m.content && m.content !== "[Image]" ? [{ type: "text" as const, text: m.content }] : []),
+            { type: "image_url" as const, image_url: { url: m.imageUrl, detail: "high" as const } },
+          ],
+        };
+      }
+      return {
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      };
+    });
+
+    // Build the current user message — multimodal if image attached
+    type TextPart = { type: "text"; text: string };
+    type ImagePart = { type: "image_url"; image_url: { url: string; detail: "high" } };
+    type ContentPart = TextPart | ImagePart;
+
+    let userContent: string | ContentPart[];
+    if (image) {
+      const parts: ContentPart[] = [];
+      if (trimmedMessage) {
+        parts.push({ type: "text", text: trimmedMessage });
+      } else {
+        parts.push({ type: "text", text: "Please analyze this image from my insurance document. Describe what you see and explain any important details." });
+      }
+      parts.push({ type: "image_url", image_url: { url: image, detail: "high" } });
+      userContent = parts;
+    } else {
+      userContent = trimmedMessage;
+    }
 
     const messages = [
       { role: "system" as const, content: systemPromptWithContext },
       ...chatHistory,
-      { role: "user" as const, content: trimmedMessage },
+      { role: "user" as const, content: userContent },
     ];
 
     const stream = await openai.chat.completions.create({
@@ -137,10 +186,11 @@ export async function POST(request: NextRequest) {
             });
 
             if (conversation.title === "New Conversation" && fullResponse) {
-              const titleSummary = message.slice(0, 50);
+              const titleSource = trimmedMessage || "Image conversation";
+              const titleSummary = titleSource.slice(0, 50);
               await prisma.conversation.update({
                 where: { id: conversationId },
-                data: { title: titleSummary + (message.length > 50 ? "..." : "") },
+                data: { title: titleSummary + (titleSource.length > 50 ? "..." : "") },
               });
             }
           } catch (dbError) {
@@ -164,11 +214,13 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Chat error:", error);
-    // Provide user-friendly error without leaking internal details
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack : undefined;
+    console.error("Chat error message:", errMsg);
+    if (errStack) console.error("Chat error stack:", errStack);
     return new Response(
       JSON.stringify({ 
-        error: "Sorry, we couldn't process your message right now. Please try again." 
+        error: errMsg || "Sorry, we couldn't process your message right now. Please try again." 
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
