@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { signOut } from "next-auth/react";
-import { HelpCircle, Settings, Moon, Sun, LogOut, ChevronDown } from "lucide-react";
+import { HelpCircle, Settings, Moon, Sun, LogOut, ChevronDown, MailWarning } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ import { ShortcutTooltip } from "@/components/ui/shortcut-tooltip";
 interface DashboardHeaderProps {
   userName?: string | null;
   userEmail?: string | null;
+  isEmailVerified?: boolean;
 }
 
 const PAGE_TITLES: Record<string, { title: string; description?: string }> = {
@@ -50,7 +51,7 @@ function getInitials(name?: string | null, email?: string | null): string {
   return "U";
 }
 
-export function DashboardHeader({ userName, userEmail }: DashboardHeaderProps) {
+export function DashboardHeader({ userName, userEmail, isEmailVerified = true }: DashboardHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -62,20 +63,29 @@ export function DashboardHeader({ userName, userEmail }: DashboardHeaderProps) {
   };
 
   return (
-    <header className="h-14 border-b bg-muted/40 backdrop-blur-sm flex items-center justify-between px-6 flex-shrink-0">
-      {/* Left: Page context */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-sm font-semibold text-foreground">{pageInfo.title}</h1>
-        {pageInfo.description && (
-          <>
-            <span className="text-muted-foreground/40">·</span>
-            <span className="text-xs text-muted-foreground hidden sm:block">{pageInfo.description}</span>
-          </>
-        )}
-      </div>
+    <>
+      {!isEmailVerified && (
+        <div className="px-6 py-2 border-b border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex items-center gap-2">
+          <MailWarning className="w-4 h-4 shrink-0" />
+          <span>
+            Please verify your email address to secure your account. Check your inbox for a verification link.
+          </span>
+        </div>
+      )}
+      <header className="h-14 border-b bg-muted/40 backdrop-blur-sm flex items-center justify-between px-6 flex-shrink-0">
+        {/* Left: Page context */}
+        <div className="flex items-center gap-3">
+          <h1 className="text-sm font-semibold text-foreground">{pageInfo.title}</h1>
+          {pageInfo.description && (
+            <>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">{pageInfo.description}</span>
+            </>
+          )}
+        </div>
 
-      {/* Right: Actions + user */}
-      <div className="flex items-center gap-2">
+        {/* Right: Actions + user */}
+        <div className="flex items-center gap-2">
         <ShortcutTooltip shortcutId="show-shortcuts" side="bottom">
           <Button
             variant="ghost"
@@ -138,7 +148,8 @@ export function DashboardHeader({ userName, userEmail }: DashboardHeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 }

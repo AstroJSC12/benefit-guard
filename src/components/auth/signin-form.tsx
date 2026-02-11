@@ -88,6 +88,11 @@ export function SignInForm() {
                 required
                 autoComplete="current-password"
               />
+              <div className="text-right">
+                <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

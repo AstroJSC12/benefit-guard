@@ -40,6 +40,7 @@ export const authOptions: NextAuthOptions = {
           onboarded: user.onboarded,
           state: user.state,
           zipCode: user.zipCode,
+          emailVerified: user.emailVerified,
         };
       },
     }),
@@ -51,12 +52,14 @@ export const authOptions: NextAuthOptions = {
         token.onboarded = user.onboarded;
         token.state = user.state;
         token.zipCode = user.zipCode;
+        token.emailVerified = user.emailVerified;
       }
       if (trigger === "update" && session) {
         token.onboarded = session.onboarded;
         token.state = session.state;
         token.zipCode = session.zipCode;
         token.name = session.name;
+        token.emailVerified = session.emailVerified;
       }
       return token;
     },
@@ -66,6 +69,7 @@ export const authOptions: NextAuthOptions = {
         session.user.onboarded = token.onboarded as boolean;
         session.user.state = token.state as string | null;
         session.user.zipCode = token.zipCode as string | null;
+        session.user.emailVerified = token.emailVerified as string | null;
       }
       return session;
     },

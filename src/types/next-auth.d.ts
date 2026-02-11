@@ -6,6 +6,7 @@ declare module "next-auth" {
     onboarded?: boolean;
     state?: string | null;
     zipCode?: string | null;
+    emailVerified?: Date | null;
   }
 
   interface Session {
@@ -16,7 +17,12 @@ declare module "next-auth" {
       onboarded?: boolean;
       state?: string | null;
       zipCode?: string | null;
+      emailVerified?: string | null;
     };
+    onboarded?: boolean;
+    state?: string | null;
+    zipCode?: string | null;
+    emailVerified?: string | null;
   }
 }
 
@@ -26,5 +32,6 @@ declare module "next-auth/jwt" {
     onboarded?: boolean;
     state?: string | null;
     zipCode?: string | null;
+    emailVerified?: Date | string | null;
   }
 }
