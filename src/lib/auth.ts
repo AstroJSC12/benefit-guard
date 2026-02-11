@@ -1,10 +1,30 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import prisma from "./db";
 
+const applePrivateKey = process.env.APPLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+const hasAppleJwtInputs =
+  !!process.env.APPLE_TEAM_ID && !!process.env.APPLE_KEY_ID && !!applePrivateKey;
+
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
+    }),
+    AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID ?? "",
+      clientSecret:
+        process.env.APPLE_CLIENT_SECRET ??
+        (hasAppleJwtInputs ? applePrivateKey ?? "" : ""),
+      allowDangerousEmailAccountLinking: true,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -22,6 +42,12 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) {
           throw new Error("No user found with this email");
+        }
+
+        if (!user.passwordHash) {
+          throw new Error(
+            "This account uses social sign-in. Continue with Google or Apple."
+          );
         }
 
         const isValid = await bcrypt.compare(
@@ -45,27 +71,12 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
-        token.id = user.id;
-        token.onboarded = user.onboarded;
-        token.state = user.state;
-        token.zipCode = user.zipCode;
-      }
-      if (trigger === "update" && session) {
-        token.onboarded = session.onboarded;
-        token.state = session.state;
-        token.zipCode = session.zipCode;
-        token.name = session.name;
-      }
-      return token;
-    },
-    async session({ session, token }) {
+    async session({ session, user }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.onboarded = token.onboarded as boolean;
-        session.user.state = token.state as string | null;
-        session.user.zipCode = token.zipCode as string | null;
+        session.user.id = user.id;
+        session.user.onboarded = user.onboarded;
+        session.user.state = user.state;
+        session.user.zipCode = user.zipCode;
       }
       return session;
     },
@@ -75,7 +86,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
