@@ -544,4 +544,27 @@ Reviewed and merged 4 Codex-generated PRs (avg score 8.4/10):
 
 ---
 
+## Phase 11: OAuth Login (Feb 11, 2026)
+
+### Google + Apple Sign-In
+- **Prisma schema**: `passwordHash` made optional (OAuth users have no password), added `image` field to User, new `Account` model with `@@unique([provider, providerAccountId])`
+- **NextAuth config** (`src/lib/auth.ts`): Added GoogleProvider + AppleProvider with `allowDangerousEmailAccountLinking: true`
+- **Account linking**: `signIn` callback handles 3 scenarios:
+  1. Existing user with matching email → links new OAuth provider to existing account
+  2. New email → creates user + account record (no password)
+  3. Credentials user tries OAuth with same email → seamlessly links both methods
+- **Credentials guard**: If an OAuth-only user tries password login, they get a helpful error: "This account uses Google or Apple sign-in"
+- **Sign-in / Sign-up UI**: Both forms now show Google + Apple buttons above a divider, with the email/password form below
+- **Error handling**: Auth error page has OAuth-specific messages (OAuthSignin, OAuthCallback, OAuthAccountNotLinked, OAuthCreateAccount)
+- **Security**: CSP updated for `accounts.google.com` and `appleid.apple.com` in `connect-src` and `frame-src`
+- **Images**: `next.config.ts` remotePatterns for `lh3.googleusercontent.com` (Google profile photos)
+- **Type declarations**: `next-auth.d.ts` updated with `image` on User/Session and `picture` on JWT
+
+### Environment Variables Required
+- `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` — from Google Cloud Console (OAuth 2.0 credentials)
+- `APPLE_CLIENT_ID` + `APPLE_CLIENT_SECRET` — from Apple Developer (Services ID + key)
+- Redirect URIs: `{NEXTAUTH_URL}/api/auth/callback/google` and `{NEXTAUTH_URL}/api/auth/callback/apple`
+
+---
+
 *This log is continuously updated as development progresses.*
