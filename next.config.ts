@@ -7,8 +7,8 @@ const ContentSecurityPolicy = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob: https://maps.googleapis.com https://lh3.googleusercontent.com https://places.googleapis.com;
-  connect-src 'self' https://*.ingest.us.sentry.io https://api.openai.com https://npiregistry.cms.hhs.gov https://places.googleapis.com https://maps.googleapis.com;
-  frame-src 'none';
+  connect-src 'self' https://*.ingest.us.sentry.io https://api.openai.com https://npiregistry.cms.hhs.gov https://places.googleapis.com https://maps.googleapis.com https://accounts.google.com https://appleid.apple.com;
+  frame-src https://accounts.google.com https://appleid.apple.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
@@ -29,6 +29,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "canvas", "tesseract.js", "pdf-to-img"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
+  },
   turbopack: {
     resolveAlias: {
       canvas: { browser: "" },

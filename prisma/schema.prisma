@@ -12,8 +12,9 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  passwordHash  String
+  passwordHash  String?
   name          String?
+  image         String?
   zipCode       String?
   state         String?
   phone         String?
@@ -21,8 +22,28 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  accounts      Account[]
   documents     Document[]
   conversations Conversation[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String  // "google" | "apple" | "credentials"
+  providerAccountId String
+  type              String  @default("oauth") // "oauth" | "credentials"
+  access_token      String?
+  refresh_token     String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Document {

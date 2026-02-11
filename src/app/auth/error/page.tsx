@@ -11,6 +11,11 @@ const ERROR_MESSAGES: Record<string, string> = {
     "The server is misconfigured. This usually means environment variables (NEXTAUTH_SECRET, DATABASE_URL) are not set.",
   AccessDenied: "You do not have permission to sign in.",
   Verification: "The verification link may have expired or already been used.",
+  OAuthSignin: "Could not start the sign-in process. Please try again.",
+  OAuthCallback: "Something went wrong during sign-in. Please try again.",
+  OAuthAccountNotLinked:
+    "This email is already associated with a different sign-in method. Please use your original sign-in method.",
+  OAuthCreateAccount: "Could not create your account. Please try again.",
   Default: "An unexpected authentication error occurred.",
 };
 
