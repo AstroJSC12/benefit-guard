@@ -1,0 +1,61 @@
+# BenefitGuard — Windsurf Agent Rules
+
+## Project Overview
+BenefitGuard is a healthcare benefits AI assistant built with Next.js 16 (App Router, Turbopack), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL (Neon). It helps users understand insurance, find in-network providers, analyze medical bills, and navigate claim denials.
+
+## Tech Stack & Constraints
+- **Framework:** Next.js 16 with App Router — NEVER use Pages Router patterns
+- **Bundler:** Turbopack (default in Next.js 16) — do NOT use webpack-only plugins
+- **Language:** TypeScript in strict mode
+- **Styling:** Tailwind CSS exclusively — no CSS modules, no styled-components, no other CSS frameworks
+- **ORM:** Prisma — all database access goes through Prisma client
+- **Database:** PostgreSQL on Neon with pgvector extension for embeddings
+- **AI:** OpenAI GPT-4o (chat/reasoning), GPT-4o-mini (embeddings)
+- **Icons:** Lucide React — do not add other icon libraries
+- **PWA:** Hand-rolled service worker at `public/sw.js` — do NOT use next-pwa or workbox plugins (incompatible with Turbopack)
+
+## Code Style
+- Preserve existing comments and documentation — do not add or remove unless explicitly asked
+- Follow existing patterns in the codebase — check similar files before creating new ones
+- Use absolute imports with `@/` prefix (e.g., `@/lib/rag`, `@/components/ui/button`)
+- Imports always go at the top of the file
+- No emojis in code files unless explicitly requested
+- Prefer minimal, focused edits over large refactors
+
+## Environment & Secrets
+- All secrets live in `.env` — NEVER hardcode API keys, tokens, or connection strings
+- Key env vars: `DATABASE_URL`, `OPENAI_API_KEY`, `GOOGLE_PLACES_API_KEY`, `CLICKUP_API_KEY`, `NEXTAUTH_SECRET`
+- The `.env` file is gitignored
+
+## Database
+- Schema is at `prisma/schema.prisma`
+- After schema changes, run: `npx prisma db push` (for dev) or generate migration
+- Prisma Client is generated to `src/generated/prisma` (gitignored)
+- Knowledge base seed: `npx --yes tsx prisma/seed.ts` (idempotent — clears and re-inserts)
+
+## Project Management
+- Full project tracked in ClickUp (Space ID: 90174101415, 8 phases, 59 tasks)
+- Run `/clickup-sync` at session start to load current project state
+- State files: `docs/clickup-daily-summary.md` (compact), `docs/clickup-project-state.json` (full)
+- Python scripts in `scripts/` use venv at `.venv/` — run with `.venv/bin/python3`
+- Update `DEVELOPMENT_LOG.md` (in parent dir) after shipping features or making architectural decisions
+
+## Key Architectural Decisions
+- RAG pipeline: vector search (pgvector) + curated knowledge base, top 5 each, fed as context to GPT-4o
+- Provider lookup: Google Places API (New) for search, NPPES for NPI enrichment, CMS TiC data for network status
+- OCR: Tesseract.js + pdf-to-img for scanned PDFs — can take 5-30s per page
+- Network status: "Verify & Cache" model — users verify via insurer directory, result shared across all users with same insurer
+- Service worker: network-first for navigation, stale-while-revalidate for static assets
+
+## Testing & Verification
+- Before committing, verify changes work by running the dev server: `npm run dev`
+- Check for TypeScript errors: `npx tsc --noEmit`
+- Check for lint issues: `npm run lint`
+
+## Common Pitfalls to Avoid
+- Do NOT use `@ducanh2912/next-pwa` or any webpack-based PWA plugin — Turbopack ignores them
+- Do NOT use `env("DATABASE_URL")` in `prisma.config.ts` — it throws during `npm install`. Use `process.env.DATABASE_URL ?? ""`
+- The `updatedAt` field on conversations doesn't auto-refresh on new messages — only on direct record updates
+- Tesseract.js downloads `eng.traineddata` (~4MB) on first use — may timeout on Vercel Hobby (10s limit)
+- ClickUp free plan has NO "move task between lists" API — use recreate-and-delete strategy (create in target list, delete original)
+- ClickUp does NOT support sub-subtasks — skip subtask creation when a task is itself a subtask

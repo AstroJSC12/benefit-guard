@@ -19,6 +19,7 @@ A Next.js 16 web app (TypeScript, Tailwind CSS, Prisma ORM, PostgreSQL on Neon) 
 - **PWA** — Installable on all platforms with custom service worker (hand-rolled, not webpack plugin — incompatible with Turbopack)
 
 The repo is at `/Users/jeffcoy/Projects/BenefitGuard/benefit-guard/`.
+**GitHub:** https://github.com/AstroJSC12/benefit-guard (main branch, up to date)
 
 ## Tech Stack
 
@@ -35,6 +36,8 @@ The repo is at `/Users/jeffcoy/Projects/BenefitGuard/benefit-guard/`.
 
 ## Key Files
 
+There is a `.windsurfrules` file in the repo root with detailed agent rules — read it at session start for tech constraints and pitfalls.
+
 | File | Purpose |
 |------|---------|
 | `src/app/api/chat/route.ts` | Main chat API with RAG pipeline |
@@ -50,6 +53,9 @@ The repo is at `/Users/jeffcoy/Projects/BenefitGuard/benefit-guard/`.
 | `scripts/tic-pipeline.ts` | CMS Transparency in Coverage data ingestion |
 | `BENEFITGUARD_SPEC.md` | Full product specification (in parent dir) |
 | `DEVELOPMENT_LOG.md` | Living development history (in parent dir) |
+| `.windsurfrules` | Agent rules: tech stack, code style, pitfalls |
+| `docs/autonomous-ai-coding-agents.md` | Research on autonomous AI tools (Codex, Claude Code, Cursor Cloud) |
+| `docs/clickup-daily-summary.md` | Auto-generated project status snapshot |
 
 ## What's Already Built (Phases 1-7 of development)
 
@@ -114,7 +120,7 @@ I want you to act as my **project orchestrator**. Here's how this works:
 1. **Start each session** with `/clickup-sync` to load current project state
 2. **Prioritize ruthlessly** — focus on what gets BenefitGuard to a usable public beta fastest
 3. **For tasks you can do directly** (in this IDE): just do them, test them, commit them
-4. **For tasks to delegate to Codex** (OpenAI's autonomous agent): write me a clear, copy-pastable prompt I can fire off at chatgpt.com/codex. Include:
+4. **For tasks to delegate to Codex** (OpenAI's autonomous agent at chatgpt.com/codex, connected to GitHub repo `AstroJSC12/benefit-guard`): write me a clear, copy-pastable prompt I can fire off. Include:
    - Exact task description
    - Relevant file paths to look at
    - Tech stack constraints
@@ -194,6 +200,17 @@ BenefitGuard is a Next.js 16 healthcare AI app (TypeScript, Tailwind CSS, Prisma
 - **No emojis in code files** unless I ask for them.
 - **Test before committing** — run the app, verify the feature works.
 
+## Reference Docs in Repo
+
+- `docs/autonomous-ai-coding-agents.md` — Full research on autonomous AI tools, task sizing, workflow strategy
+- `docs/cascade-handoff-prompt.md` — This prompt (for future reference/updates)
+- `docs/clickup-daily-summary.md` — Auto-generated project status
+- `docs/clickup-project-state.json` — Full state dump (gitignored)
+
 ## Let's Go
 
-Start by running `/clickup-sync` to load the current project state, then let's figure out the most impactful thing to tackle right now. Suggest which tasks I should fire off to Codex in parallel and which ones we should handle together interactively.
+1. Read `.windsurfrules` for project rules
+2. Run `/clickup-sync` to load current project state
+3. Review what's due soonest and highest priority
+4. Propose a battle plan: which tasks to do interactively (you and me), which to delegate to Codex, and in what order
+5. Start executing — build what you can directly, write Codex prompts for the rest
