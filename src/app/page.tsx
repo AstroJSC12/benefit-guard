@@ -224,10 +224,23 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p className="mb-2">
+          <p className="mb-3">
             BenefitGuard provides information about insurance coverage, not
             medical advice.
           </p>
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <Link href="/legal/terms" className="hover:text-foreground transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-border">|</span>
+            <Link href="/legal/privacy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-border">|</span>
+            <Link href="/legal/disclaimers" className="hover:text-foreground transition-colors">
+              Disclaimers
+            </Link>
+          </div>
           <p>© {new Date().getFullYear()} BenefitGuard. All rights reserved.</p>
         </div>
       </footer>
