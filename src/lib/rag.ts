@@ -253,3 +253,6 @@ export function buildContextPrompt(context: RAGContext): string {
 
   return parts.join("\n");
 }
+
+
+export const __testables = { expandQueryKeywords };

@@ -6,6 +6,7 @@ import { processDocument, detectDocumentType } from "@/lib/documents";
 
 export async function POST(request: NextRequest) {
   try {
+    const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
     if (file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Only PDF files are supported" },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: "File is too large. Maximum size is 10MB" },
         { status: 400 }
       );
     }
