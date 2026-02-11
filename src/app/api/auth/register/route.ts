@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/db";
+import { createEmailVerificationToken } from "@/lib/auth-tokens";
+import { getAppUrl } from "@/lib/app-url";
+import { sendEmail } from "@/lib/email";
+import { buildVerificationEmailTemplate } from "@/lib/email-templates";
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +52,15 @@ export async function POST(request: NextRequest) {
         passwordHash,
         name: name || null,
       },
+    });
+
+    const verificationToken = await createEmailVerificationToken(user.id);
+    const verificationLink = `${getAppUrl()}/auth/verify?token=${verificationToken.token}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your BenefitGuard account",
+      html: buildVerificationEmailTemplate(verificationLink),
     });
 
     return NextResponse.json({

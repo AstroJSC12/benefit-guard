@@ -29,6 +29,7 @@ export default async function DashboardLayout({
           <DashboardHeader
             userName={session.user.name}
             userEmail={session.user.email}
+            isEmailVerified={Boolean(session.user.emailVerified)}
           />
           <main className="flex-1 overflow-hidden">{children}</main>
         </div>
