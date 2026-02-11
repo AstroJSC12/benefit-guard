@@ -4,11 +4,16 @@ import prisma from "@/lib/db";
 import { openai, SYSTEM_PROMPT } from "@/lib/openai";
 import { retrieveContext, buildContextPrompt } from "@/lib/rag";
 import { logApiUsage } from "@/lib/api-usage";
+import { applyRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 const VoiceResponse = twilio.twiml.VoiceResponse;
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP (Twilio webhook, no auth session)
+    const blocked = applyRateLimit(request, null, "voice");
+    if (blocked) return blocked;
+
     const formData = await request.formData();
     const speechResult = formData.get("SpeechResult") as string | null;
     const callSid = formData.get("CallSid") as string;

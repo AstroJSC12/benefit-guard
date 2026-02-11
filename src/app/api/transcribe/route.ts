@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { openai } from "@/lib/openai";
 import { logApiUsage } from "@/lib/api-usage";
+import { applyRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const blocked = applyRateLimit(request, session.user.id, "transcription");
+    if (blocked) return blocked;
 
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File | null;

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { processDocument, detectDocumentType } from "@/lib/documents";
+import { applyRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const blocked = applyRateLimit(request, session.user.id, "default");
+    if (blocked) return blocked;
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

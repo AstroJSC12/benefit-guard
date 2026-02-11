@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { openai, SYSTEM_PROMPT } from "@/lib/openai";
 import { retrieveContext, buildContextPrompt } from "@/lib/rag";
 import { logApiUsage } from "@/lib/api-usage";
+import { applyRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest) {
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
+
+    const blocked = applyRateLimit(request, session.user.id, "chat");
+    if (blocked) return blocked;
 
     const { message, conversationId, image } = await request.json();
 

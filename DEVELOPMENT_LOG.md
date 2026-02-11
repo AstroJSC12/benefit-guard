@@ -473,4 +473,75 @@ Added `=` and `-` keys to zoom in/out on the PDF viewer (both My Documents page 
 
 ---
 
+## Phase 10: Codex Integration & Rate Limiting (Feb 11, 2026)
+
+### Codex PR Review & Integration
+Reviewed and merged 4 Codex-generated PRs (avg score 8.4/10):
+
+**CI/CD Pipeline (8/10)** — `.github/workflows/ci.yml`
+- GitHub Actions workflow: lint + typecheck on all pushes, build on PRs to main
+- Node 22, npm ci, Prisma generate, dummy env vars for CI build
+- Added test step after integrating vitest
+
+**User Settings Page (9/10)** — Best Codex PR
+- `src/app/dashboard/settings/page.tsx` — 3-tab settings (Profile, Notifications, Account)
+- `src/app/api/user/profile/route.ts` — PATCH with zip/phone validation
+- `src/app/api/user/account/route.ts` — DELETE with session cleanup
+- `src/app/api/user/export/route.ts` — Full user data export as JSON
+- `src/components/ui/switch.tsx` — Toggle component for notification preferences
+
+**Admin Dashboard with Metrics (9/10)**
+- `src/lib/admin.ts` — Shared `isAdminEmail()` helper (adopted by existing usage route)
+- `src/app/api/admin/metrics/route.ts` — User counts, conversations, messages, most active users
+- `src/app/api/admin/system/route.ts` — DB health, Node/Prisma versions, uptime
+- `src/app/dashboard/admin/layout.tsx` — Server-side 403 gate for non-admin users
+- `src/app/dashboard/admin/page.tsx` — Stat cards, recent users table, system health panel
+- Admin nav link in sidebar (only visible to admin users via `isAdmin` prop)
+
+**Test Suite with Vitest (7.5/10)**
+- `vitest.config.ts` — Node environment, globals, path aliases
+- `src/__tests__/helpers/` — Reusable mock-session and mock-prisma helpers
+- 8 test files covering chat, transcribe, providers, network-status, upload, admin/usage, rag, api-usage
+- Added `npm test` and `npm run test:watch` scripts
+- Required manual conflict resolution for `api-usage.ts` exports and `rag.ts` testables
+
+### Rate Limiting & Abuse Prevention
+- **Core library**: `src/lib/rate-limit.ts` — Sliding window rate limiter
+  - In-memory store with LRU eviction (10K key cap) and periodic cleanup
+  - Tiered rate limits: chat (20/min), transcription (10/min), voice (10/min), embedding (30/min), default (60/min)
+  - Standardized 429 responses with `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` headers
+  - `applyRateLimit()` one-liner for route handlers
+  - `getRateLimitKey()` — prefers userId, falls back to IP via `x-forwarded-for` / `x-real-ip`
+  - Documented upgrade path to Upstash Redis for production distributed rate limiting
+
+- **Route integration**: Applied to 4 API routes:
+  - `/api/chat` — "chat" tier (20 req/min, most expensive OpenAI calls)
+  - `/api/transcribe` — "transcription" tier (10 req/min, Whisper API)
+  - `/api/voice/twilio` — "voice" tier (10 req/min, by IP since no auth)
+  - `/api/documents/upload` — "default" tier (60 req/min)
+
+- **Tests**: `src/__tests__/lib/rate-limit.test.ts` — 11 tests covering:
+  - Allow/block behavior, tier independence, key independence
+  - Remaining count tracking, reset timestamps
+  - Key extraction (userId vs IP headers vs fallback)
+  - 429 response format with proper headers
+
+### Key Files Modified/Created
+- `.github/workflows/ci.yml` (created, then updated with test step)
+- `src/lib/rate-limit.ts` (created)
+- `src/lib/admin.ts` (created by Codex)
+- `src/app/dashboard/settings/page.tsx` (replaced placeholder)
+- `src/app/api/user/{profile,account,export}/route.ts` (created by Codex)
+- `src/app/api/admin/{metrics,system}/route.ts` (created by Codex)
+- `src/app/dashboard/admin/{layout,page}.tsx` (created by Codex)
+- `src/components/ui/switch.tsx` (created by Codex)
+- `src/lib/api-usage.ts` (exported `MODEL_PRICING` and `estimateCost` for tests)
+- `src/lib/rag.ts` (added `__testables` export for test access)
+- `src/app/api/{chat,transcribe,voice/twilio,documents/upload}/route.ts` (added rate limiting)
+- `vitest.config.ts`, `src/__tests__/` (test infrastructure)
+- `tsconfig.json` (excluded `src/__tests__` from main compilation)
+- `package.json` (added vitest, test scripts)
+
+---
+
 *This log is continuously updated as development progresses.*
