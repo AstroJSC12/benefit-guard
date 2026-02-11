@@ -82,7 +82,7 @@ function relativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function ConversationSidebar() {
+export function ConversationSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -558,6 +558,14 @@ export function ConversationSidebar() {
             </div>
           </Link>
         </ShortcutTooltip>
+        {isAdmin && (
+          <Link href="/dashboard/admin" onClick={() => setIsMobileOpen(false)} className="block">
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm ${pathname.includes("/admin") ? "bg-muted font-medium" : ""}`}>
+              <Shield className="w-4 h-4" />
+              Admin
+            </div>
+          </Link>
+        )}
       </div>
     </div>
   );

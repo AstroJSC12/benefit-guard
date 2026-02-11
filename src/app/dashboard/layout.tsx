@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { KeyboardShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { isAdminEmail } from "@/lib/admin";
 
 export default async function DashboardLayout({
   children,
@@ -20,10 +21,12 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
+  const canAccessAdmin = isAdminEmail(session.user.email);
+
   return (
     <KeyboardShortcutsProvider>
       <div className="flex h-screen">
-        <ConversationSidebar />
+        <ConversationSidebar isAdmin={canAccessAdmin} />
         <div className="flex-1 flex flex-col overflow-hidden">
           <DashboardHeader
             userName={session.user.name}
