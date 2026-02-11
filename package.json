@@ -25,6 +25,7 @@
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@sentry/nextjs": "^10.38.0",
     "@tailwindcss/typography": "^0.5.19",
     "bcryptjs": "^3.0.3",
     "canvas": "^3.2.1",

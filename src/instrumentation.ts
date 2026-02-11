@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 /**
  * Next.js Instrumentation — runs BEFORE any other server-side code.
  * 
@@ -9,6 +11,13 @@
  * tries to use them.
  */
 export async function register() {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("../sentry.server.config");
+  }
+  if (process.env.NEXT_RUNTIME === "edge") {
+    await import("../sentry.edge.config");
+  }
+
   if (typeof globalThis.DOMMatrix === "undefined") {
     // @ts-expect-error - stub for Node.js compatibility (text extraction only, no rendering)
     globalThis.DOMMatrix = class DOMMatrix {
@@ -33,3 +42,5 @@ export async function register() {
     };
   }
 }
+
+export const onRequestError = Sentry.captureRequestError;
