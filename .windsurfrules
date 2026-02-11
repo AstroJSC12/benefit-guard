@@ -47,10 +47,19 @@ BenefitGuard is a healthcare benefits AI assistant built with Next.js 16 (App Ro
 - Network status: "Verify & Cache" model — users verify via insurer directory, result shared across all users with same insurer
 - Service worker: network-first for navigation, stale-while-revalidate for static assets
 
+## Branching & Deployment Safety
+- **NEVER commit directly to `main`** — always work on a feature branch
+- Branch naming: `feat/<short-description>`, `fix/<short-description>`, or `chore/<short-description>`
+- After finishing work on a branch, push it and let Jeff review the Vercel Preview Deployment before merging
+- Vercel auto-deploys every branch push — preview URL appears in the GitHub PR
+- Production (`main` branch) is deployed at the live Vercel URL — only merge after preview review
+- If multiple features are in progress, use separate branches to avoid conflicts
+
 ## Testing & Verification
 - Before committing, verify changes work by running the dev server: `npm run dev`
 - Check for TypeScript errors: `npx tsc --noEmit`
 - Check for lint issues: `npm run lint`
+- After pushing a branch, check the Vercel Preview Deployment URL to verify in a production-like environment
 
 ## Common Pitfalls to Avoid
 - Do NOT use `@ducanh2912/next-pwa` or any webpack-based PWA plugin — Turbopack ignores them

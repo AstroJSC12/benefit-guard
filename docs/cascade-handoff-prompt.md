@@ -111,15 +111,30 @@ cat docs/clickup-daily-summary.md
 - `NEXTAUTH_URL`, `NEXTAUTH_SECRET` — Auth config
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` — Voice (not yet configured)
 
+## Deployment
+
+- **Hosted on:** Vercel (project ID: `prj_7Fn9bVha8d228JL1EtICp4znc9aR`)
+- **Production:** deploys from `main` branch automatically
+- **Preview:** every branch pushed to GitHub gets a Vercel Preview Deployment with its own URL
+- **Safety rule:** NOTHING goes to `main` without me reviewing a preview deployment first
+
 ## Your Role: Orchestrator
 
 I want you to act as my **project orchestrator**. Here's how this works:
+
+### Branching Strategy (IMPORTANT)
+
+**NEVER commit directly to `main`.** All work goes on feature branches:
+- Cascade work: create a branch like `feat/oauth-login`, do the work, push it, I'll review the Vercel preview
+- Codex work: Codex automatically creates PRs (on its own branches), I review and merge
+- Only after I've reviewed the Vercel Preview Deployment do we merge anything to `main`
+- If working on multiple features, use separate branches to avoid conflicts
 
 ### The Strategy
 
 1. **Start each session** with `/clickup-sync` to load current project state
 2. **Prioritize ruthlessly** — focus on what gets BenefitGuard to a usable public beta fastest
-3. **For tasks you can do directly** (in this IDE): just do them, test them, commit them
+3. **For tasks you can do directly** (in this IDE): create a feature branch, do the work, test locally, push the branch. I'll review the Vercel preview before merging to `main`
 4. **For tasks to delegate to Codex** (OpenAI's autonomous agent at chatgpt.com/codex, connected to GitHub repo `AstroJSC12/benefit-guard`): write me a clear, copy-pastable prompt I can fire off. Include:
    - Exact task description
    - Relevant file paths to look at
@@ -127,7 +142,7 @@ I want you to act as my **project orchestrator**. Here's how this works:
    - Acceptance criteria
    - What NOT to do (common pitfalls)
 5. **Update ClickUp** as we go — mark tasks complete, add notes, create new tasks if needed
-6. **Track what Codex is working on** so we don't create merge conflicts
+6. **Track what Codex is working on** so we don't create merge conflicts (different branches, different files)
 
 ### Priority Order for MVP
 
@@ -164,7 +179,8 @@ When writing Codex prompts, use this format:
 ## Task: [Task Name]
 
 ### Context
-BenefitGuard is a Next.js 16 healthcare AI app (TypeScript, Tailwind CSS, Prisma ORM, PostgreSQL on Neon). 
+BenefitGuard is a Next.js 16 healthcare AI app (TypeScript, Tailwind CSS, Prisma ORM, PostgreSQL on Neon).
+GitHub repo: AstroJSC12/benefit-guard
 
 ### What to Build
 [Specific description]
@@ -175,12 +191,16 @@ BenefitGuard is a Next.js 16 healthcare AI app (TypeScript, Tailwind CSS, Prisma
 ### Tech Constraints
 - Next.js 16 App Router (NOT Pages Router)
 - TypeScript strict mode
-- Tailwind CSS for all styling (no CSS modules)
+- Tailwind CSS for all styling (no CSS modules, no styled-components)
 - Prisma ORM for database access
+- Lucide React for icons (do not add other icon libraries)
 - Keep existing code patterns — check similar files for style
 - Do NOT modify or delete existing comments/documentation
+- Do NOT use webpack-only plugins (we use Turbopack)
+- All env vars accessed via process.env — never hardcode secrets
 
 ### Acceptance Criteria
+- [ ] `npm run build` passes with no errors
 - [ ] [Specific testable criterion]
 - [ ] [Another criterion]
 
@@ -189,6 +209,7 @@ BenefitGuard is a Next.js 16 healthcare AI app (TypeScript, Tailwind CSS, Prisma
 - Don't use Pages Router patterns (we use App Router)
 - Don't hardcode API keys
 - Don't modify unrelated files
+- Don't merge to main — create a PR for review
 ```
 
 ## Important Preferences
