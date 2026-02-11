@@ -228,6 +228,11 @@ export default function Home() {
             BenefitGuard provides information about insurance coverage, not
             medical advice.
           </p>
+          <p className="mb-2">
+            <Link href="/legal/disclaimers" className="underline underline-offset-4 hover:text-foreground transition-colors">
+              Medical & legal disclaimers
+            </Link>
+          </p>
           <p>© {new Date().getFullYear()} BenefitGuard. All rights reserved.</p>
         </div>
       </footer>

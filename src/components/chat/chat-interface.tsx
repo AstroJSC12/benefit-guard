@@ -9,6 +9,7 @@ import { Send, Loader2, User, AlertCircle, RefreshCw, Shield, Paperclip, X, Imag
 import ReactMarkdown from "react-markdown";
 import { SourceOverlay } from "@/components/documents/source-overlay";
 import { VoiceInput } from "@/components/chat/voice-input";
+import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface SourceRef {
   documentId: string;
@@ -405,6 +406,9 @@ export function ChatInterface({
             BenefitGuard provides information about insurance coverage, not
             medical advice. You can paste or attach screenshots of insurance documents.
           </p>
+          <div className="mt-3">
+            <DisclaimerBanner />
+          </div>
         </form>
       </div>
       {sourceRef && (
