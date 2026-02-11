@@ -34,7 +34,7 @@ describe("GET /api/providers", () => {
 
     const res = await GET(new Request("http://localhost/api/providers") as never);
 
-    expect(findNearbyProviders).toHaveBeenCalledWith("10001", undefined);
+    expect(findNearbyProviders).toHaveBeenCalledWith("10001", null);
     await expect(res.json()).resolves.toEqual({ providers: [], location: "10001" });
   });
 
@@ -45,7 +45,7 @@ describe("GET /api/providers", () => {
 
     const res = await GET(new Request("http://localhost/api/providers?location=30301") as never);
 
-    expect(findNearbyProviders).toHaveBeenCalledWith("30301", undefined);
+    expect(findNearbyProviders).toHaveBeenCalledWith("30301", null);
     await expect(res.json()).resolves.toEqual({ providers: [{ npi: "123" }], location: "30301" });
   });
 
