@@ -253,3 +253,6 @@ export function buildContextPrompt(context: RAGContext): string {
 
   return parts.join("\n");
 }
+
+// Exposed for testing only — not part of the public API
+export const __testables = { expandQueryKeywords };

@@ -18,7 +18,7 @@ import prisma from "@/lib/db";
 type Endpoint = "chat" | "embedding" | "transcription" | "voice";
 
 // Cost per 1M tokens in USD cents
-const COST_RATES: Record<string, { input: number; output: number }> = {
+export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   "gpt-4o":                 { input: 250,   output: 1000 },
   "gpt-4-turbo-preview":    { input: 1000,  output: 3000 },
   "text-embedding-ada-002": { input: 10,    output: 0 },
@@ -33,12 +33,12 @@ const DAILY_ALERT_THRESHOLD_CENTS = Number(
 /**
  * Calculate estimated cost in USD cents.
  */
-function estimateCost(
+export function estimateCost(
   model: string,
   inputTokens: number,
   outputTokens: number
 ): number {
-  const rates = COST_RATES[model];
+  const rates = MODEL_PRICING[model];
   if (!rates) return 0;
   const inputCost = (inputTokens / 1_000_000) * rates.input;
   const outputCost = (outputTokens / 1_000_000) * rates.output;
