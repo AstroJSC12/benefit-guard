@@ -1,0 +1,255 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service — BenefitGuard",
+  description: "Terms of Service for BenefitGuard, your AI-powered healthcare insurance assistant.",
+};
+
+export default function TermsOfServicePage() {
+  return (
+    <article className="prose prose-neutral dark:prose-invert max-w-none">
+      <h1 className="text-3xl font-bold tracking-tight mb-2">Terms of Service</h1>
+      <p className="text-muted-foreground text-sm mb-8">Last updated: February 11, 2026</p>
+
+      <p>
+        Welcome to BenefitGuard. These Terms of Service (&ldquo;Terms&rdquo;) govern your access to
+        and use of the BenefitGuard website, application, and services (collectively, the
+        &ldquo;Service&rdquo;) operated by BenefitGuard (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
+        &ldquo;our&rdquo;). By accessing or using the Service, you agree to be bound by these Terms.
+        If you do not agree, do not use the Service.
+      </p>
+
+      <h2>1. Description of Service</h2>
+      <p>
+        BenefitGuard is an AI-powered informational tool designed to help you understand your health
+        insurance benefits, find healthcare providers, analyze insurance documents, and learn about
+        your rights under federal and state law. The Service uses artificial intelligence (including
+        OpenAI&apos;s GPT-4o) to generate responses based on your questions, uploaded documents, and
+        our curated knowledge base of healthcare regulations.
+      </p>
+      <p className="font-semibold">
+        BenefitGuard is NOT a medical provider, law firm, insurance company, financial advisor, or
+        licensed professional of any kind. The Service provides general informational guidance only.
+        See our{" "}
+        <a href="/legal/disclaimers" className="text-primary hover:underline">
+          Disclaimers
+        </a>{" "}
+        page for full details.
+      </p>
+
+      <h2>2. Eligibility</h2>
+      <p>To use BenefitGuard, you must:</p>
+      <ul>
+        <li>Be at least 18 years of age</li>
+        <li>Be a resident of the United States</li>
+        <li>Have the legal capacity to enter into a binding agreement</li>
+        <li>Provide accurate and complete information when creating an account</li>
+      </ul>
+      <p>
+        If you are using the Service on behalf of a family member or dependent, you represent that
+        you have the legal authority to act on their behalf and agree to these Terms for them.
+      </p>
+
+      <h2>3. Account Registration and Security</h2>
+      <p>
+        To access most features of BenefitGuard, you must create an account. You are responsible for:
+      </p>
+      <ul>
+        <li>Maintaining the confidentiality of your login credentials</li>
+        <li>All activity that occurs under your account</li>
+        <li>Notifying us immediately of any unauthorized access at support@benefitguard.app</li>
+      </ul>
+      <p>
+        We reserve the right to suspend or terminate accounts that violate these Terms or that we
+        reasonably believe are being used fraudulently.
+      </p>
+
+      <h2>4. Acceptable Use</h2>
+      <p>You agree NOT to use the Service to:</p>
+      <ul>
+        <li>Submit false, misleading, or fraudulent information</li>
+        <li>Attempt to obtain medical diagnoses, treatment recommendations, or prescriptions</li>
+        <li>Harass, abuse, or harm others through the platform</li>
+        <li>Upload malicious files, viruses, or harmful content</li>
+        <li>
+          Reverse-engineer, scrape, or attempt to extract the underlying AI models or proprietary
+          data
+        </li>
+        <li>Use automated tools (bots, scrapers) to access the Service without written permission</li>
+        <li>Resell, redistribute, or commercially exploit the Service or its outputs</li>
+        <li>Violate any applicable local, state, national, or international law</li>
+      </ul>
+
+      <h2>5. Document Uploads</h2>
+      <p>
+        BenefitGuard allows you to upload insurance documents (such as Summary of Benefits and
+        Coverage, Explanation of Benefits, medical bills, and denial letters) for AI-assisted
+        analysis. By uploading documents, you represent that:
+      </p>
+      <ul>
+        <li>You have the legal right to share the documents with our Service</li>
+        <li>
+          The documents may contain personal health information, and you consent to our processing of
+          this information as described in our{" "}
+          <a href="/legal/privacy" className="text-primary hover:underline">
+            Privacy Policy
+          </a>
+        </li>
+        <li>
+          You understand that AI-generated analysis of documents may contain errors and should be
+          verified with your insurance company
+        </li>
+      </ul>
+
+      <h2>6. AI-Generated Content</h2>
+      <p>
+        Responses provided by BenefitGuard are generated by artificial intelligence and are intended
+        for informational purposes only. You acknowledge and agree that:
+      </p>
+      <ul>
+        <li>
+          AI responses may be inaccurate, incomplete, or outdated — insurance plans, laws, and
+          regulations change frequently
+        </li>
+        <li>
+          You should always verify information directly with your insurance company, healthcare
+          provider, or a qualified professional before making decisions
+        </li>
+        <li>
+          BenefitGuard does not guarantee the accuracy, completeness, or timeliness of any
+          AI-generated content
+        </li>
+        <li>
+          Reliance on AI-generated information is at your own risk
+        </li>
+      </ul>
+
+      <h2>7. Provider Directory Information</h2>
+      <p>
+        Our provider search feature uses data from Google Places, the National Plan and Provider
+        Enumeration System (NPPES), and CMS Transparency in Coverage files. This information:
+      </p>
+      <ul>
+        <li>May not be current — provider networks, hours, and locations change</li>
+        <li>
+          Does not constitute a guarantee that a provider is in your insurance network — always
+          verify with your insurer before scheduling an appointment
+        </li>
+        <li>Is provided as a convenience and should not be your sole source of provider information</li>
+      </ul>
+
+      <h2>8. Intellectual Property</h2>
+      <p>
+        The Service, including its design, code, AI models, curated knowledge base, and content, is
+        owned by BenefitGuard and protected by copyright, trademark, and other intellectual property
+        laws. You may not copy, modify, distribute, or create derivative works from any part of the
+        Service without our prior written consent.
+      </p>
+      <p>
+        You retain ownership of any documents you upload. By uploading documents, you grant us a
+        limited, non-exclusive license to process them for the purpose of providing the Service to
+        you.
+      </p>
+
+      <h2>9. Disclaimers and Limitation of Liability</h2>
+      <p>
+        THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT
+        WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED
+        WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+      </p>
+      <p>
+        TO THE MAXIMUM EXTENT PERMITTED BY LAW, BENEFITGUARD SHALL NOT BE LIABLE FOR ANY INDIRECT,
+        INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES,
+        WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER
+        INTANGIBLE LOSSES, RESULTING FROM:
+      </p>
+      <ul>
+        <li>Your use of or inability to use the Service</li>
+        <li>Any errors, inaccuracies, or omissions in AI-generated content</li>
+        <li>
+          Any decisions you make based on information provided by the Service, including but not
+          limited to medical, legal, financial, or insurance-related decisions
+        </li>
+        <li>Unauthorized access to or alteration of your data</li>
+        <li>Any third-party content or services accessed through the platform</li>
+      </ul>
+      <p>
+        IN NO EVENT SHALL OUR TOTAL LIABILITY EXCEED THE AMOUNT YOU PAID TO US IN THE TWELVE (12)
+        MONTHS PRECEDING THE CLAIM, OR $100, WHICHEVER IS GREATER.
+      </p>
+
+      <h2>10. Indemnification</h2>
+      <p>
+        You agree to indemnify, defend, and hold harmless BenefitGuard, its officers, directors,
+        employees, and agents from any claims, damages, losses, liabilities, and expenses (including
+        reasonable attorneys&apos; fees) arising from your use of the Service, violation of these
+        Terms, or infringement of any third-party rights.
+      </p>
+
+      <h2>11. Termination</h2>
+      <p>
+        You may stop using the Service and delete your account at any time through your account
+        settings. We may suspend or terminate your access if you violate these Terms, if required by
+        law, or if we discontinue the Service.
+      </p>
+      <p>
+        Upon termination, your right to use the Service ceases immediately. We will delete your
+        account data in accordance with our{" "}
+        <a href="/legal/privacy" className="text-primary hover:underline">
+          Privacy Policy
+        </a>
+        , except as required to comply with legal obligations.
+      </p>
+
+      <h2>12. Changes to These Terms</h2>
+      <p>
+        We may update these Terms from time to time. When we make material changes, we will notify
+        you by email or by posting a notice on the Service prior to the changes taking effect. Your
+        continued use of the Service after the effective date constitutes acceptance of the updated
+        Terms.
+      </p>
+
+      <h2>13. Governing Law and Dispute Resolution</h2>
+      <p>
+        These Terms are governed by the laws of the State of New York, without regard to its conflict
+        of law provisions. Any disputes arising from these Terms or the Service shall be resolved
+        through binding arbitration administered by the American Arbitration Association, except that
+        either party may seek injunctive relief in a court of competent jurisdiction. The arbitration
+        shall take place in New York, New York.
+      </p>
+
+      <h2>14. Severability</h2>
+      <p>
+        If any provision of these Terms is found to be unenforceable, the remaining provisions will
+        continue in full force and effect.
+      </p>
+
+      <h2>15. Entire Agreement</h2>
+      <p>
+        These Terms, together with our{" "}
+        <a href="/legal/privacy" className="text-primary hover:underline">
+          Privacy Policy
+        </a>{" "}
+        and{" "}
+        <a href="/legal/disclaimers" className="text-primary hover:underline">
+          Disclaimers
+        </a>
+        , constitute the entire agreement between you and BenefitGuard regarding the use of the
+        Service.
+      </p>
+
+      <h2>16. Contact Us</h2>
+      <p>
+        If you have questions about these Terms, please contact us at:
+      </p>
+      <ul>
+        <li>
+          Email:{" "}
+          <a href="mailto:legal@benefitguard.app" className="text-primary hover:underline">
+            legal@benefitguard.app
+          </a>
+        </li>
+      </ul>
+    </article>
+  );
+}
