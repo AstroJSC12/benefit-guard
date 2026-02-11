@@ -10,6 +10,7 @@
  */
 
 import OpenAI from "openai";
+import { logApiUsage } from "@/lib/api-usage";
 
 // Warn at startup if API key is missing - this is a critical dependency
 if (!process.env.OPENAI_API_KEY) {
@@ -35,10 +36,19 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     throw new Error("OpenAI API key not configured");
   }
   
+  const startTime = Date.now();
   const response = await openai.embeddings.create({
     model: "text-embedding-ada-002",
     input: text,
   });
+
+  logApiUsage({
+    endpoint: "embedding",
+    model: "text-embedding-ada-002",
+    inputTokens: response.usage?.total_tokens || 0,
+    durationMs: Date.now() - startTime,
+  }).catch(() => {});
+
   return response.data[0].embedding;
 }
 
@@ -52,10 +62,19 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     throw new Error("OpenAI API key not configured");
   }
 
+  const startTime = Date.now();
   const response = await openai.embeddings.create({
     model: "text-embedding-ada-002",
     input: texts,
   });
+
+  logApiUsage({
+    endpoint: "embedding",
+    model: "text-embedding-ada-002",
+    inputTokens: response.usage?.total_tokens || 0,
+    durationMs: Date.now() - startTime,
+    metadata: { batchSize: texts.length },
+  }).catch(() => {});
 
   // OpenAI returns embeddings in the same order as inputs
   return response.data

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { openai, SYSTEM_PROMPT } from "@/lib/openai";
 import { retrieveContext, buildContextPrompt } from "@/lib/rag";
+import { logApiUsage } from "@/lib/api-usage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -151,16 +152,19 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: userContent },
     ];
 
+    const chatStartTime = Date.now();
     const stream = await openai.chat.completions.create({
       model: "gpt-4o",
       messages,
       stream: true,
+      stream_options: { include_usage: true },
       temperature: 0.3,
       max_tokens: 1500,
     });
 
     const encoder = new TextEncoder();
     let fullResponse = "";
+    let streamUsage: { prompt_tokens: number; completion_tokens: number } | null = null;
 
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -172,6 +176,13 @@ export async function POST(request: NextRequest) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
               );
+            }
+            // The final chunk contains usage data when stream_options.include_usage is set
+            if (chunk.usage) {
+              streamUsage = {
+                prompt_tokens: chunk.usage.prompt_tokens,
+                completion_tokens: chunk.usage.completion_tokens,
+              };
             }
           }
 
@@ -196,6 +207,16 @@ export async function POST(request: NextRequest) {
           } catch (dbError) {
             console.error("Failed to save assistant message to DB:", dbError);
           }
+
+          // Log API usage (fire-and-forget)
+          logApiUsage({
+            endpoint: "chat",
+            model: "gpt-4o",
+            inputTokens: streamUsage?.prompt_tokens || 0,
+            outputTokens: streamUsage?.completion_tokens || 0,
+            durationMs: Date.now() - chatStartTime,
+            userId: session.user.id,
+          }).catch(() => {});
 
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
