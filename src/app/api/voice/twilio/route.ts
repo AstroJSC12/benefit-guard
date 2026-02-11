@@ -3,6 +3,7 @@ import twilio from "twilio";
 import prisma from "@/lib/db";
 import { openai, SYSTEM_PROMPT } from "@/lib/openai";
 import { retrieveContext, buildContextPrompt } from "@/lib/rag";
+import { logApiUsage } from "@/lib/api-usage";
 
 const VoiceResponse = twilio.twiml.VoiceResponse;
 
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       ? `${SYSTEM_PROMPT}\n\nIMPORTANT: You are speaking on a phone call. Keep responses concise and conversational. Avoid long lists or complex formatting.\n\n--- RELEVANT CONTEXT ---\n${contextPrompt}`
       : `${SYSTEM_PROMPT}\n\nIMPORTANT: You are speaking on a phone call. Keep responses concise and conversational. The caller may not have an account yet.`;
 
+    const voiceStartTime = Date.now();
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [
@@ -67,6 +69,15 @@ export async function POST(request: NextRequest) {
       temperature: 0.7,
       max_tokens: 300,
     });
+
+    logApiUsage({
+      endpoint: "voice",
+      model: "gpt-4-turbo-preview",
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      durationMs: Date.now() - voiceStartTime,
+      userId: user?.id,
+    }).catch(() => {});
 
     const response =
       completion.choices[0]?.message?.content ||

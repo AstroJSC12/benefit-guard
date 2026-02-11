@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { openai } from "@/lib/openai";
+import { logApiUsage } from "@/lib/api-usage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,11 +22,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const startTime = Date.now();
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
       language: "en",
     });
+
+    logApiUsage({
+      endpoint: "transcription",
+      model: "whisper-1",
+      inputTokens: Math.ceil(transcription.text.length / 4), // rough token estimate
+      durationMs: Date.now() - startTime,
+      userId: session.user.id,
+      metadata: { audioSizeBytes: audioFile.size },
+    }).catch(() => {});
 
     return NextResponse.json({ text: transcription.text });
   } catch (error) {
