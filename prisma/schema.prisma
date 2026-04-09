@@ -150,3 +150,13 @@ model NetworkStatus {
   @@index([npi])
   @@index([insurerId])
 }
+
+model LeadCapture {
+  id        String   @id @default(cuid())
+  email     String
+  source    String   @default("playbook") // "playbook" | future lead magnets
+  createdAt DateTime @default(now())
+
+  @@unique([email, source])
+  @@index([source])
+}
