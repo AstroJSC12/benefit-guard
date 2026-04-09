@@ -10,5 +10,14 @@ if (process.env.SENTRY_DSN) {
 
     // Performance monitoring: sample 20% of edge transactions
     tracesSampleRate: 0.2,
+
+    // Scrub potential PHI from error reports
+    beforeSend(event) {
+      if (event.request) {
+        delete event.request.data;
+        delete event.request.cookies;
+      }
+      return event;
+    },
   });
 }

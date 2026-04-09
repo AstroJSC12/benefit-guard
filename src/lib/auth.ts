@@ -5,6 +5,21 @@ import AppleProvider from "next-auth/providers/apple";
 import bcrypt from "bcryptjs";
 import prisma from "./db";
 
+// Validate NEXTAUTH_SECRET at startup
+const secret = process.env.NEXTAUTH_SECRET;
+if (!secret) {
+  console.error(
+    "🔴 NEXTAUTH_SECRET is not set — authentication will not work. " +
+    "Generate one with: openssl rand -base64 32"
+  );
+} else if (secret.length < 32 || secret.includes("change-in-production") || secret.includes("dev-secret")) {
+  console.warn(
+    "⚠️  NEXTAUTH_SECRET appears weak or is a dev placeholder. " +
+    "In production, use a strong random value (32+ chars). " +
+    "Generate one with: openssl rand -base64 32"
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({

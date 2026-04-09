@@ -1,19 +1,19 @@
 # BenefitGuard: Project Status
 
-**Last synced:** 2026-02-11T22:53:15.769079+00:00
+**Last synced:** 2026-04-03T14:15:00.444849+00:00
 **Space ID:** 90174101415
 **Workspace:** Jeff C's Workspace (9017067210)
 **ClickUp:** https://app.clickup.com/9017067210/v/l/li/90174101415
 
 ## Overview
-- **Tasks:** 59 (10 completed)
+- **Tasks:** 59 (11 completed)
 - **Subtasks:** 0 (0 completed)
 - **Lists:** 10
 
 ## Lists
 
 ### Phase 1: Production Infrastructure → Infrastructure & Security
-6/10 tasks done
+7/10 tasks done
 
 - ⬜ **Custom Domain & SSL** [due 2026-02-24] (Priority: Normal) ~2h
 - ✅ **OpenAI Cost Monitoring & Alerts** [due 2026-02-17] (Priority: High) ~4h
@@ -24,7 +24,7 @@
 - ✅ **Error Monitoring (Sentry)** [due 2026-02-18] (Priority: High) ~4h
 - ✅ **Rate Limiting & Abuse Prevention** [due 2026-02-17] (Priority: Urgent) ~6h
 - ⬜ **Email Verification + Password Reset** [due 2026-02-22] (Priority: High) ~8h
-- ⬜ **OAuth Login (Google + Apple)** [due 2026-02-20] (Priority: High) ~8h
+- ✅ **OAuth Login (Google + Apple)** [due 2026-02-20] (Priority: High) ~8h
 
 ### Phase 2: Legal & Compliance → Legal Requirements
 3/6 tasks done
@@ -116,7 +116,6 @@
 | Due | Task | List | Priority |
 |-----|------|------|----------|
 | 2026-02-20 | Environment Management (Staging + Production) | Infrastructure & Security | High |
-| 2026-02-20 | OAuth Login (Google + Apple) | Infrastructure & Security | High |
 | 2026-02-22 | Email Verification + Password Reset | Infrastructure & Security | High |
 | 2026-02-24 | Custom Domain & SSL | Infrastructure & Security | Normal |
 | 2026-02-28 | Encryption at Rest Audit | Legal Requirements | Normal |
@@ -127,3 +126,25 @@
 | 2026-03-07 | Landing Page / Marketing Site | User Experience | High |
 | 2026-03-10 | Mobile Responsiveness Audit | User Experience | High |
 | 2026-03-12 | Loading States & Error Handling | User Experience | Normal |
+| 2026-03-14 | Accessibility Audit (WCAG 2.1 AA) | User Experience | High |
+| 2026-03-15 | Guided Onboarding Tour | User Experience | Normal |
+| 2026-03-16 | Document Upload UX Improvements | User Experience | Normal |
+| 2026-03-24 | 50-State Law Coverage | Feature Development | High |
+| 2026-03-24 | ✨ Public Beta Launch | 🏁 Milestones | High |
+| 2026-03-28 | Bill Analysis Tool | Feature Development | High |
+| 2026-03-31 | Claim Denial Appeal Assistant | Feature Development | High |
+| 2026-04-01 | Cost Estimator | Feature Development | Normal |
+| 2026-04-03 | Family Member Management | Feature Development | Normal |
+| 2026-04-04 | Auto-Detect Document Type | Feature Development | Normal |
+| 2026-04-06 | Knowledge Base Auto-Update Cron Job | Feature Development | Normal |
+| 2026-04-07 | 🧩 Feature-Complete Release | 🏁 Milestones | High |
+| 2026-04-11 | Caching Layer (Upstash Redis) | Performance Optimization | Normal |
+| 2026-04-13 | OpenAI Cost Optimization | Performance Optimization | High |
+| 2026-04-14 | Background Job Queue | Performance Optimization | Normal |
+| 2026-04-18 | Multi-Insurer TiC Data Pipeline | Performance Optimization | High |
+| 2026-04-19 | Database Optimization & Indexing | Performance Optimization | Normal |
+| 2026-04-20 | CDN & Asset Optimization | Performance Optimization | Low |
+| 2026-04-21 | ⚡ Performance-Optimized | 🏁 Milestones | High |
+| 2026-04-26 | Stripe Integration & Subscription Billing | Billing & Revenue | High |
+| 2026-04-28 | Pricing Tier Design & Implementation | Billing & Revenue | High |
+| 2026-04-30 | Usage Tracking & Limits | Billing & Revenue | Normal |

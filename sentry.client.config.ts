@@ -15,7 +15,11 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     integrations: [
-      Sentry.replayIntegration(),
+      Sentry.replayIntegration({
+        // Mask all text in session replays to prevent PHI capture
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
     ],
 
     // Filter out noisy errors that aren't actionable
@@ -25,5 +29,14 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
       "AbortError",
       "cancelled",
     ],
+
+    // Scrub potential PHI from error reports
+    beforeSend(event) {
+      if (event.request) {
+        delete event.request.data;
+        delete event.request.cookies;
+      }
+      return event;
+    },
   });
 }

@@ -20,8 +20,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Configure PDF.js worker — bundled locally to avoid external CDN dependency
+// If pdfjs-dist is updated, re-copy: cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 // Nuclear fix for text layer + annotation layer rendering.
 // The text layer is an INVISIBLE overlay used only for text selection and search.

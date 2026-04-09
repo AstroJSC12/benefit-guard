@@ -239,9 +239,9 @@ export default function PlaybookLandingPage() {
             </div>
             <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
               Built from federal consumer protection laws and the same curated
-              knowledge base used by BenefitGuard, the AI-powered health
-              insurance navigator. We help real people understand their coverage
-              and fight for their rights.
+              knowledge base that powers BenefitGuard, an AI-powered health
+              insurance navigator designed to help real people understand their
+              coverage and fight for their rights.
             </p>
           </div>
         </section>

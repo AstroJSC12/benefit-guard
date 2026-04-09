@@ -1,14 +1,17 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob: https://maps.googleapis.com https://lh3.googleusercontent.com https://places.googleapis.com;
   connect-src 'self' https://*.ingest.us.sentry.io https://api.openai.com https://npiregistry.cms.hhs.gov https://places.googleapis.com https://maps.googleapis.com https://accounts.google.com https://appleid.apple.com;
   frame-src https://accounts.google.com https://appleid.apple.com;
+  worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
