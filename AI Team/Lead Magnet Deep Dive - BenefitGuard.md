@@ -1,7 +1,8 @@
 # LEAD MAGNET DEEP DIVE
 
-**Date:** April 9, 2026
+**Date:** April 9, 2026 (updated after discussion)
 **Purpose:** Pressure-test the current lead magnet choice and evaluate alternatives based on competitive landscape, conversion data, and audience behavior.
+**Status:** Option B (Quiz) selected as primary lead magnet. Already built and deployed at /quiz. Positioning shifted from "legal fighter" to "insurance copilot."
 
 ---
 
@@ -72,40 +73,45 @@ Drop the appeal letter templates entirely. That's what BenefitGuard does — and
 
 ---
 
-### OPTION B: "Is Your Insurance Screwing You?" Quiz
+### OPTION B: "Is Your Insurance Screwing You?" Quiz ✅ SELECTED — BUILT AND DEPLOYED
 
-**Format:** Interactive quiz built directly into the landing page (not a PDF). 5-7 questions. Results page with email capture.
+**Format:** Interactive quiz built directly into a dedicated page (/quiz). 7 questions. Personalized results with risk scoring. Email capture on results page.
 
-**How it works:**
-1. User lands on benefit-guard.jeffcoy.net/playbook (or /quiz)
-2. Quiz asks:
-   - "Have you had a health insurance claim denied in the past year?" (Y/N)
-   - "Have you received a medical bill you didn't expect or couldn't understand?" (Y/N)
-   - "Do you know the difference between your copay, deductible, and out-of-pocket max?" (Y/N/Not sure)
-   - "Has your insurance company required prior authorization for a treatment?" (Y/N)
-   - "Do you know how to check if a doctor is actually in your network?" (Y/N)
-   - "If your claim was denied, do you know your legal right to appeal?" (Y/N)
-   - "Do you know which government agency to contact if your insurer won't cooperate?" (Y/N)
-3. Results page: "You scored X/7. Here's what that means for your wallet."
-   - Personalized summary: "Based on your answers, you may be leaving $X,XXX on the table" (using the research stats)
-   - Specific recommendations based on their answers (denied claim → action plan, bill confusion → decoder, etc.)
-   - Email capture: "Get your personalized insurance action plan"
-4. Email delivers: The appropriate resource + bridges to BenefitGuard
+**Live at:** benefit-guard.jeffcoy.net/quiz
 
-**Why this could be the winner:**
+**How it works (as built):**
+1. User lands on benefit-guard.jeffcoy.net/quiz
+2. Intro screen with headline, stats, and "Take the Quiz" CTA
+3. Quiz asks 7 questions (one at a time, with progress bar and smooth transitions):
+   - "Have you had a health insurance claim denied in the past year?"
+   - "Have you received a medical bill that was higher than expected?"
+   - "Could you confidently explain what your deductible, copay, and out-of-pocket maximum mean?"
+   - "Has your insurance required prior authorization before approving a treatment or medication?"
+   - "If a claim was denied tomorrow, would you know how to appeal it?"
+   - "Do you know which government agency to contact if your insurer refuses to cooperate?"
+   - "Have you ever paid a medical bill you thought might be wrong, just to avoid the hassle?"
+4. Results page with 4 risk tiers (Low/Moderate/High/Critical), color-coded:
+   - Personalized insights based on flagged problem areas (each cites real stats)
+   - Email capture: "Get Your Personalized Action Plan"
+   - BenefitGuard CTA bridge: "Want answers personalized to your exact plan, right now?"
+5. Email delivers: Action plan + bridges to BenefitGuard
+
+**Why this won:**
 - Quizzes convert at 20-40% — highest of any lead magnet format
 - Interactive content gets 70% more conversions than static
-- Segments leads by problem type (denied claim vs. bill confusion vs. general confusion) — better email nurture
+- Segments leads by problem type (denied claim vs. bill confusion vs. general confusion) — enables smarter email nurture
 - Feels like a tool, not a sales pitch
-- Shareable on Reddit: "I found this quiz that shows how much your insurance might be screwing you" is more viral than "here's a PDF"
+- Shareable: "I found this quiz that shows how much your insurance might be screwing you" is more viral than "here's a PDF"
 - Data collection: You learn exactly what problems your audience has
-- The KFF quiz ("How Well Do You Understand Your Health Insurance?") already proved this concept works — it's one of their most popular pages
+- The KFF quiz ("How Well Do You Understand Your Health Insurance?") already proved this concept works
+- **Broadest audience** — works for anyone with health insurance, not just people with active denials
+- **Aligns with copilot positioning** — the quiz diagnoses confusion and positions BenefitGuard as the ongoing solution, not a one-time legal weapon
 
 **Conversion estimate:** 30-45%
 
-**Build time:** 6-8 hours (it's a Next.js page with state management — you've built harder things)
+**Build time:** Built in ~2 hours. Live and deployed.
 
-**Best for:** Broadest audience. Works for anyone with health insurance, not just people with denied claims. Higher volume, slightly lower intent per lead.
+**Best for:** Everything. Primary landing page for all channels (Reddit, Quora, LinkedIn, organic search).
 
 ---
 
@@ -184,40 +190,41 @@ Drop the appeal letter templates entirely. That's what BenefitGuard does — and
 
 ---
 
-## MY RECOMMENDATION
+## DECISION: OPTION B IS PRIMARY
 
-**Ship Option A (revised) first. Build Option B (quiz) second.**
+**The quiz is the primary lead magnet. It's built and deployed.**
 
-Here's why:
+The original recommendation was to ship Option A first and build the quiz second. That was wrong — it prioritized "fastest to ship" over "highest converting." When challenged, the math was clear: a 4-5 hour build time difference is irrelevant against a potential 2x conversion lift. Additionally, the quiz is CODE (buildable autonomously), while the other options are designed PDFs (requiring manual design work).
 
-1. **Option A (Revised Playbook → "24-Hour Action Plan")** is the fastest to ship, directly addresses the highest-urgency pain point, and fixes the original's biggest weakness (too long, template-focused). It works on Reddit immediately. Ship this in Week 1.
+**The positioning shift also made the quiz the obvious choice.** BenefitGuard's brand is "your AI insurance copilot" — a helpful interpreter, not a legal weapon. The quiz embodies this: it diagnoses your insurance blind spots and guides you to solutions. Option A (denied claim action plan) leaned too hard into the legal/adversarial framing that doesn't match the product's identity.
 
-2. **Option B (Quiz)** is the highest-converting format by far (30-45%), segments your leads, and creates the best bridge to BenefitGuard. Build this in Week 2-3 and run it alongside the action plan. Use the quiz as the primary landing page, deliver the action plan as the post-quiz email resource.
+**Current status:**
+- ✅ **Option B (Quiz):** Built, deployed, live at /quiz. Primary lead magnet for all channels.
+- ⏳ **Option A (Action Plan):** Content can be created as an email deliverable for quiz subscribers. Lower priority.
+- ⏳ **Option C (Decoder Card):** Strong secondary resource for LinkedIn. Create when bandwidth allows.
+- 📦 **Option D (Bill Audit Kit):** In the chamber as a pivot option at the 90-day mark.
 
-3. **Option C (Decoder Card)** is a strong content upgrade for LinkedIn posts and general insurance confusion threads. Create this in Week 3-4 as a secondary resource.
+**The active funnel:**
+- Reddit/Quora/Google → Quiz (benefit-guard.jeffcoy.net/quiz) → personalized results → email capture → action plan delivery → nurture sequence → BenefitGuard
 
-4. **Option D (Bill Audit Kit)** is a solid backup if the denied claim angle doesn't validate. Keep it in the chamber for the 90-day pivot point mentioned in the Go-To-Market Pack.
-
-**The ideal funnel:**
-- Reddit/Google → Quiz (benefit-guard.jeffcoy.net/quiz) → email capture → delivers Action Plan + Decoder Card → nurture sequence → BenefitGuard
-
-This gives you three lead magnets serving different segments:
-- **Crisis moment** (just got denied) → Action Plan
-- **General confusion** (doesn't understand insurance) → Quiz + Decoder Card  
-- **Bill anxiety** (got a bill, not sure if it's right) → Bill Audit Kit (Phase 2)
+Lead magnets serve different segments:
+- **Everyone with insurance** → Quiz (primary entry point)
+- **Crisis moment** (just got denied) → Action Plan (email deliverable)
+- **General confusion** → Decoder Card (LinkedIn content upgrade)
+- **Bill anxiety** → Bill Audit Kit (Phase 2 if needed)
 
 ---
 
-## WHAT CHANGES IN THE EXISTING DOCUMENTS
+## WHAT CHANGED IN THE EXISTING DOCUMENTS
 
-If you go with this approach:
+The following updates were made to reflect these decisions:
 
-**MVT Strategy Card:** Lead magnet name changes from "The Denied Claim Playbook" to "The Denied Claim Action Plan: What to Do in the Next 24 Hours." Format changes from 14-page PDF to 4-page rapid guide. Build time drops from 5-6 hours to 2-3 hours.
+**Go-To-Market Pack:** ✅ Updated. Quiz is now the primary lead magnet. Landing page URL changed to /quiz. Brand positioning codified ("AI insurance copilot"). Quora added as tertiary channel. Sales funnel updated to reflect quiz flow. 30/60/90 plan updated.
 
-**Copy Pack:** Landing page copy stays 90% the same. Headline still works. Benefit bullets need minor tweaks (remove template references, emphasize speed and the phone call script). Lead magnet outline shrinks dramatically. Email sequence stays the same but Email 1's quick win becomes even more impactful when the whole resource IS the quick win.
+**MVT Strategy Card:** Validation metric aligned to 50 signups in 30 days (from the unrealistic 100 in 14 days). Lead magnet name and format should be updated to reflect the quiz when next revised.
 
-**Go-To-Market Pack:** Quiz becomes the primary landing page in Week 2-3. Action Plan becomes the email deliverable. Add Decoder Card as LinkedIn content upgrade. No changes to channel strategy or time allocation.
+**Copy Pack:** Trust signal fixed. Reddit post honesty issue fixed. Email sign-off progression improved (Team → Jeff → Jeff, Founder). Social post copy may need updates to reference the quiz link instead of the playbook.
 
-**Landing Page Code:** Minor copy updates. Quiz would be a new page (/quiz) or could replace the current /playbook page.
+**Landing Page Code:** ✅ Quiz built and deployed at /quiz. Playbook page still live at /playbook as a secondary entry point. Trust signal updated on playbook page.
 
-**None of these changes require starting over.** They're refinements that make the existing strategy sharper and more competitive.
+**Research Brief:** 80% billing error stat given nuance. Transcarent-Accolade acquisition added to market analysis.
