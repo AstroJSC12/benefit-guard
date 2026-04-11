@@ -217,14 +217,16 @@ Lead magnets serve different segments:
 
 ## WHAT CHANGED IN THE EXISTING DOCUMENTS
 
-The following updates were made to reflect these decisions:
+All documents have been updated to reflect the quiz-first strategy and copilot positioning. All files renumbered with chronological prefixes (1-5).
 
-**Go-To-Market Pack:** ✅ Updated. Quiz is now the primary lead magnet. Landing page URL changed to /quiz. Brand positioning codified ("AI insurance copilot"). Quora added as tertiary channel. Sales funnel updated to reflect quiz flow. 30/60/90 plan updated.
+**1) Research Brief:** ✅ Updated. 80% billing error stat given nuance. Transcarent-Accolade acquisition added to market analysis. No lead magnet references to update (research only).
 
-**MVT Strategy Card:** Validation metric aligned to 50 signups in 30 days (from the unrealistic 100 in 14 days). Lead magnet name and format should be updated to reflect the quiz when next revised.
+**2) MVT Strategy Card:** ✅ Fully rewritten. Lead magnet section now documents quiz (primary) and action plan (secondary). Pain point broadened from "denied claims" to "insurance confusion" (the root cause). Validation section, scope guardrails, and core promise all updated. No stale references remain.
 
-**Copy Pack:** Trust signal fixed. Reddit post honesty issue fixed. Email sign-off progression improved (Team → Jeff → Jeff, Founder). Social post copy may need updates to reference the quiz link instead of the playbook.
+**3) Copy Pack:** ✅ Fully updated. Offer, hook, benefit bullets, landing page copy, lead magnet outline (14-page playbook → 4-page action plan), email sequence, social posts, and CTA variations all rewritten for quiz-first strategy. Brand positioning added to header. Both quiz page and playbook page copy documented.
+
+**4) Go-To-Market Pack:** ✅ Fully updated. Quiz is primary lead magnet. Brand positioning codified. Quora added as tertiary channel. Sales funnel, 30/60/90 plan, outreach scripts, and metrics dashboard all updated. All "playbook" references replaced with "quiz" or "action plan" where appropriate.
+
+**5) Lead Magnet Deep Dive:** ✅ Updated (this document). Decision section reflects quiz as winner. Status tracker shows what's built vs. pending.
 
 **Landing Page Code:** ✅ Quiz built and deployed at /quiz. Playbook page still live at /playbook as a secondary entry point. Trust signal updated on playbook page.
-
-**Research Brief:** 80% billing error stat given nuance. Transcarent-Accolade acquisition added to market analysis.

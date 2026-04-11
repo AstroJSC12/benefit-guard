@@ -14,7 +14,7 @@
 
 **Primary Channel: Reddit**
 
-- **Strategy:** Become the most helpful person in health insurance subreddits. Not selling. Not dropping links. Genuinely answering people's questions about denied claims, confusing bills, and insurance rights. When your answer naturally connects to the playbook, you share it. Reddit rewards people who show up with real knowledge. It punishes people who self-promote. So you lead with value and let the playbook link earn its place.
+- **Strategy:** Become the most helpful person in health insurance subreddits. Not selling. Not dropping links. Genuinely answering people's questions about denied claims, confusing bills, and insurance rights. When your answer naturally connects to the quiz, you share it. Reddit rewards people who show up with real knowledge. It punishes people who self-promote. So you lead with value and let the quiz link earn its place.
 - **Target communities:**
   - r/HealthInsurance (300K+ members) — people actively asking "my claim was denied, what do I do?"
   - r/personalfinance (19M+ members) — medical debt and insurance questions pop up daily
@@ -22,14 +22,14 @@
   - r/ChronicIllness, r/healthcare, r/MedicalBill — smaller but high-intent
 - **Posting frequency:** 4-5 times per week (mix of answering existing threads and 1-2 original posts per week)
 - **Content format:**
-  - **60% Comment replies:** Find posts where someone is asking about a denied claim, a confusing bill, or how to appeal. Write a genuinely helpful answer. If the playbook is relevant, mention it at the end: "I put together a free guide on this exact process if you want the templates: [link]"
-  - **30% Original posts:** Use the Reddit posts from the Copy Pack. Alternate between pain-point posts (sharing stats, asking questions) and value posts (sharing the playbook directly)
+  - **60% Comment replies:** Find posts where someone is asking about a denied claim, a confusing bill, or how to appeal. Write a genuinely helpful answer. If the quiz is relevant, mention it at the end: "I built a free quiz that shows where your insurance might have gaps — takes 2 minutes: [link]"
+  - **30% Original posts:** Use the Reddit posts from the Copy Pack. Alternate between pain-point posts (sharing stats, asking questions) and value posts (sharing the quiz directly)
   - **10% Community engagement:** Upvote, reply to other helpful answers, build reputation as someone who knows their stuff
 - **Time allocation:** 3 hours/week
 
 **Secondary Channel: LinkedIn**
 
-- **Tactic:** One post per week sharing a sharp insight about health insurance. Not the playbook link every time. Think: "Here's a stat that should piss you off" or "Here's what I learned building an AI tool for health insurance." Builds professional credibility. Reaches HR people, benefits brokers, and healthcare professionals who could become B2B leads later. Low effort, long-game payoff.
+- **Tactic:** One post per week sharing a sharp insight about health insurance. Not the quiz link every time. Think: "Here's a stat that should piss you off" or "Here's what I learned building an AI tool for health insurance." Builds professional credibility. Reaches HR people, benefits brokers, and healthcare professionals who could become B2B leads later. Low effort, long-game payoff.
 - **Frequency:** 1 post per week (can batch-write monthly)
 - **Time allocation:** 1 hour/week (including writing and replying to comments)
 
@@ -77,7 +77,7 @@ Your unfair advantage is that you've literally built the product. You have deep 
 **What "working" looks like:** 30-45% of quiz completers enter their email. Quizzes convert significantly higher than static pages. If below 20%, the results page copy or email value prop needs work.
 
 ### 4. Nurture
-**Action:** They receive the 3-email welcome sequence. Email 1 delivers the playbook with a quick win. Email 2 deepens the problem. Email 3 introduces BenefitGuard.
+**Action:** They receive the 3-email welcome sequence. Email 1 delivers the action plan with a quick win. Email 2 deepens the problem. Email 3 introduces BenefitGuard.
 **Platform:** Email (set up Resend, SendGrid, or ConvertKit)
 **What "working" looks like:** 50%+ open rate on Email 1. 30%+ open rate on Emails 2-3. Click-throughs on Email 3's CTA to BenefitGuard.
 
@@ -145,10 +145,10 @@ Your unfair advantage is that you've literally built the product. You have deep 
 **Goal:** First 1 to 3 paying customers
 
 **Week 9 to 10: Nurture and Convert**
-- Send a dedicated email to your list introducing BenefitGuard as the product. Not a hard sell. Frame it as: "The playbook helped you with one denial. BenefitGuard helps you with everything — ongoing, personalized, instant."
-- Add a "What if this was automatic?" section to the playbook PDF itself (last page, linking to BenefitGuard)
+- Send a dedicated email to your list introducing BenefitGuard as the product. Not a hard sell. Frame it as: "The quiz showed you the gaps. The action plan gave you the steps. BenefitGuard is the AI copilot that does it all for you — personalized to your actual plan, anytime."
+- Add a "What if this was automatic?" section to the action plan PDF (last page, linking to BenefitGuard)
 - Continue Reddit engagement (this never stops — it's your primary lead generation channel)
-- If you have any testimonials or success stories from playbook users, add them to the landing page and share on LinkedIn
+- If you have any testimonials or success stories from quiz takers or action plan users, add them to the landing page and share on LinkedIn
 
 **Week 11 to 12: Optimize and Decide**
 - Review all metrics. What's working? What's not?
@@ -168,22 +168,22 @@ Your unfair advantage is that you've literally built the product. You have deep 
 
 **Script 1 — Reddit DM to someone who posted about a denied claim:**
 
-Hey — saw your post about your [procedure/claim] getting denied. That's really frustrating, especially when you don't know what your options are. I've been researching this space for months and put together a free guide that walks through the exact appeal process step by step, including letter templates you can use. Happy to share it if you want — no strings attached.
+Hey — saw your post about your [procedure/claim] getting denied. That's really frustrating, especially when you don't know what your options are. I've been researching this space for months and built a free quiz that shows you where your insurance knowledge has gaps and gives you an action plan to protect yourself. Takes 2 minutes — happy to share the link if you want. No strings attached.
 
 **Script 2 — Reddit DM to someone asking how to fight their insurance:**
 
-Hey, just read your thread. Wanted to let you know — you actually have legal appeal rights that most people don't know about (seriously, 60% of insured adults have no idea). I wrote a free playbook that breaks down the 5-step process with templates you can copy and send. Want me to send you the link?
+Hey, just read your thread. Wanted to let you know — you actually have legal appeal rights that most people don't know about (seriously, 60% of insured adults have no idea). I built a free quiz that shows you where your insurance might be costing you, plus it comes with an action plan for fighting denied claims. Want me to send you the link?
 
 **Script 3 — LinkedIn message to an HR/benefits professional:**
 
-Hey [Name] — I've been building a tool that helps employees navigate their health insurance (understand coverage, appeal denied claims, verify network status). I put together a free resource on fighting denied claims that might be useful for employees dealing with this. Would love to hear if this is something that comes up in your world. Here's the link if you're curious: [link]
+Hey [Name] — I've been building an AI copilot that helps employees navigate their health insurance (understand coverage, appeal denied claims, verify network status). I put together a free quiz that shows people where their insurance knowledge has gaps — might be useful for employees dealing with this stuff. Would love to hear if this is something that comes up in your world. Here's the link if you're curious: [link]
 
 ---
 
 ## WEEKLY METRICS DASHBOARD
 
 **Metric 1: Email Signups (This Week)**
-- **What it measures:** New lead magnet downloads — the core demand signal
+- **What it measures:** New quiz completions + email sign-ups — the core demand signal
 - **How to track:** Query the LeadCapture table in your database (SELECT COUNT(*) FROM "LeadCapture" WHERE "createdAt" > now() - interval '7 days') or build a simple admin dashboard view
 - **Green signal:** 10+ new signups per week after the first 2 weeks
 - **Red signal and fix:** Under 5 per week after week 3. Diagnose: Are people seeing your posts (check upvotes/impressions)? Are they clicking through (check UTM traffic)? Are they converting on the page (check signup rate vs visitors)? Fix the weakest link first. If traffic is low, post more. If conversion is low, sharpen the landing page headline.
@@ -198,4 +198,4 @@ Hey [Name] — I've been building a tool that helps employees navigate their hea
 - **What it measures:** Whether your email nurture sequence is building enough trust and interest to drive people toward BenefitGuard
 - **How to track:** Click tracking in your email service (Resend/ConvertKit) on Email 3's CTA link to BenefitGuard
 - **Green signal:** 5-10% of subscribers click through to BenefitGuard within the first week of receiving Email 3
-- **Red signal and fix:** Under 3% click-through. Either: (a) Email 3's offer isn't compelling enough — rewrite the bridge between the playbook and the product, or (b) Emails 1-2 aren't building enough trust — review open rates and tighten the content. If open rates are fine but clicks are low, the problem is the offer. If open rates are low, the problem is the subject lines.
+- **Red signal and fix:** Under 3% click-through. Either: (a) Email 3's offer isn't compelling enough — rewrite the bridge between the action plan and the product, or (b) Emails 1-2 aren't building enough trust — review open rates and tighten the content. If open rates are fine but clicks are low, the problem is the offer. If open rates are low, the problem is the subject lines.
