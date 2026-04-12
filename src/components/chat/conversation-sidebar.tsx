@@ -24,6 +24,7 @@ import {
   Shield,
   X,
   Home,
+  BookOpen,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
@@ -550,6 +551,12 @@ export function ConversationSidebar({ isAdmin = false }: { isAdmin?: boolean }) 
             </div>
           </Link>
         </ShortcutTooltip>
+        <Link href="/blog" onClick={() => setIsMobileOpen(false)} className="block">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm">
+            <BookOpen className="w-4 h-4" />
+            Resources
+          </div>
+        </Link>
         <ShortcutTooltip shortcutId="nav-settings" side="right">
           <Link href="/dashboard/settings" onClick={() => setIsMobileOpen(false)} className="block">
             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm ${pathname.includes("/settings") ? "bg-muted font-medium" : ""}`}>

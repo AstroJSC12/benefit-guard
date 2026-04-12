@@ -27,6 +27,12 @@ export default function Home() {
             <span className="text-xl font-semibold">BenefitGuard</span>
           </div>
           <nav className="flex items-center gap-2">
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+              Blog
+            </Link>
+            <Link href="/quiz" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1">
+              Free Quiz
+            </Link>
             <ThemeToggle />
             <Link href="/auth/signin">
               <Button variant="ghost" size="sm">Sign In</Button>
@@ -229,6 +235,14 @@ export default function Home() {
             medical advice.
           </p>
           <div className="flex items-center justify-center gap-4 mb-3">
+            <Link href="/blog" className="hover:text-foreground transition-colors">
+              Blog
+            </Link>
+            <span className="text-border">|</span>
+            <Link href="/quiz" className="hover:text-foreground transition-colors">
+              Free Quiz
+            </Link>
+            <span className="text-border">|</span>
             <Link href="/legal/terms" className="hover:text-foreground transition-colors">
               Terms of Service
             </Link>
