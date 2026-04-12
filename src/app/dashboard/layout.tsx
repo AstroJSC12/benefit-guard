@@ -5,6 +5,8 @@ import { isAdminEmail } from "@/lib/admin";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { KeyboardShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { ChatWidgetProvider } from "@/contexts/chat-widget-context";
+import { ChatWidget } from "@/components/chat/chat-widget";
 
 export default async function DashboardLayout({
   children,
@@ -23,16 +25,19 @@ export default async function DashboardLayout({
 
   return (
     <KeyboardShortcutsProvider>
-      <div className="flex h-screen">
-        <ConversationSidebar isAdmin={isAdminEmail(session.user.email)} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardHeader
-            userName={session.user.name}
-            userEmail={session.user.email}
-          />
-          <main className="flex-1 overflow-hidden">{children}</main>
+      <ChatWidgetProvider>
+        <div className="flex h-screen">
+          <ConversationSidebar isAdmin={isAdminEmail(session.user.email)} />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <DashboardHeader
+              userName={session.user.name}
+              userEmail={session.user.email}
+            />
+            <main className="flex-1 overflow-hidden">{children}</main>
+          </div>
         </div>
-      </div>
+        <ChatWidget />
+      </ChatWidgetProvider>
     </KeyboardShortcutsProvider>
   );
 }

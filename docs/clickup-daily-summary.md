@@ -1,12 +1,12 @@
 # BenefitGuard: Project Status
 
-**Last synced:** 2026-04-12T01:17:21.250485+00:00
+**Last synced:** 2026-04-12T20:52:54.489427+00:00
 **Space ID:** 90174101415
 **Workspace:** Jeff C's Workspace (9017067210)
 **ClickUp:** https://app.clickup.com/9017067210/v/l/li/90174101415
 
 ## Overview
-- **Tasks:** 64 (17 completed)
+- **Tasks:** 65 (17 completed)
 - **Subtasks:** 0 (0 completed)
 - **Lists:** 10
 
@@ -37,8 +37,9 @@
 - ✅ **Terms of Service** [due 2026-02-24] (Priority: Urgent) ~6h
 
 ### Phase 3: UX & Onboarding Polish → User Experience
-3/7 tasks done
+3/8 tasks done
 
+- ⬜ **Add voice input (mic button) to concierge home page** (Priority: High)
 - ⬜ **Document Upload UX Improvements** [due 2026-05-22] (Priority: Normal) ~6h
 - ⬜ **Guided Onboarding Tour** [due 2026-05-29] (Priority: Normal) ~6h
 - ⬜ **Accessibility Audit (WCAG 2.1 AA)** [due 2026-06-05] (Priority: High) ~8h

@@ -6,9 +6,10 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function ConversationPage({ params }: Props) {
+export default async function ConversationPage({ params, searchParams }: Props) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -16,6 +17,8 @@ export default async function ConversationPage({ params }: Props) {
   }
 
   const { id } = await params;
+  const resolvedSearch = await searchParams;
+  const autoMessage = typeof resolvedSearch.q === "string" ? resolvedSearch.q : undefined;
 
   const conversation = await prisma.conversation.findFirst({
     where: {
@@ -43,6 +46,6 @@ export default async function ConversationPage({ params }: Props) {
   }));
 
   return (
-    <ChatInterface conversationId={conversation.id} initialMessages={messages} />
+    <ChatInterface conversationId={conversation.id} initialMessages={messages} autoMessage={autoMessage} />
   );
 }

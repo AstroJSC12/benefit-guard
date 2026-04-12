@@ -27,6 +27,7 @@ interface Message {
 interface ChatInterfaceProps {
   conversationId: string;
   initialMessages?: Message[];
+  autoMessage?: string;
 }
 
 function FeedbackButtons({ message, onFeedback }: { message: Message; onFeedback: (fb: string | null) => void }) {
@@ -72,6 +73,7 @@ function FeedbackButtons({ message, onFeedback }: { message: Message; onFeedback
 export function ChatInterface({
   conversationId,
   initialMessages = [],
+  autoMessage,
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -129,15 +131,16 @@ export function ChatInterface({
     e.target.value = "";
   }, [processImageFile]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent, directMessage?: string) => {
     e?.preventDefault();
-    if ((!input.trim() && !pendingImage) || isLoading) return;
+    const messageText = directMessage || input.trim();
+    if ((!messageText && !pendingImage) || isLoading) return;
 
     const imageToSend = pendingImage;
     const userMessage: Message = {
       id: `temp-${Date.now()}`,
       role: "user",
-      content: input.trim() || (imageToSend ? "[Image]" : ""),
+      content: messageText || (imageToSend ? "[Image]" : ""),
       imageUrl: imageToSend || undefined,
     };
 
@@ -159,7 +162,7 @@ export function ChatInterface({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMessage.content !== "[Image]" ? userMessage.content : "",
+          message: messageText || "",
           conversationId,
           ...(imageToSend ? { image: imageToSend } : {}),
         }),
@@ -221,6 +224,15 @@ export function ChatInterface({
       handleSubmit();
     }
   };
+
+  // Auto-send message from concierge page (via ?q= query param)
+  const autoMessageSent = useRef(false);
+  useEffect(() => {
+    if (autoMessage && !autoMessageSent.current && !isLoading) {
+      autoMessageSent.current = true;
+      handleSubmit(undefined, autoMessage);
+    }
+  }, [autoMessage]);
 
   const handleTranscription = (text: string) => {
     setInput((prev) => (prev ? `${prev} ${text}` : text));

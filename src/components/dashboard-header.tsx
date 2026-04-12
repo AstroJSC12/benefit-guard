@@ -26,7 +26,7 @@ const PAGE_TITLES: Record<string, { title: string; description?: string }> = {
   "/dashboard/documents": { title: "My Documents", description: "Your uploaded insurance documents" },
   "/dashboard/providers": { title: "Find Providers", description: "Nearby healthcare providers" },
   "/dashboard/settings": { title: "Settings", description: "Manage your account" },
-  "/dashboard": { title: "Home", description: "Your benefits at a glance" },
+  "/dashboard": { title: "Home" },
 };
 
 function getPageInfo(pathname: string) {
