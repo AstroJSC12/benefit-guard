@@ -111,6 +111,7 @@ model Message {
   role           String
   content        String
   imageUrl       String?
+  feedback       String?  // "positive" | "negative" | null
   createdAt      DateTime @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)

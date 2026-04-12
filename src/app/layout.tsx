@@ -5,6 +5,8 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PWARegister } from "@/components/pwa-register";
+import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { Suspense } from "react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -57,9 +59,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            {children}
-            <Toaster />
-            <PWARegister />
+            <Suspense fallback={null}>
+              <PostHogProvider>
+                {children}
+                <Toaster />
+                <PWARegister />
+              </PostHogProvider>
+            </Suspense>
           </SessionProvider>
         </ThemeProvider>
       </body>

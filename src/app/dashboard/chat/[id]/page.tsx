@@ -33,11 +33,12 @@ export default async function ConversationPage({ params }: Props) {
     notFound();
   }
 
-  const messages = conversation.messages.map((m: { id: string; role: string; content: string; imageUrl?: string | null; createdAt: Date }) => ({
+  const messages = conversation.messages.map((m: { id: string; role: string; content: string; imageUrl?: string | null; feedback?: string | null; createdAt: Date }) => ({
     id: m.id,
     role: m.role as "user" | "assistant",
     content: m.content,
     imageUrl: m.imageUrl || undefined,
+    feedback: m.feedback || null,
     createdAt: m.createdAt,
   }));
 

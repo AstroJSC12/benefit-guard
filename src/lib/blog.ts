@@ -132,6 +132,81 @@ export const articles: BlogArticle[] = [
       "texas surprise bill law",
     ],
   },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-florida",
+    title: "How to Appeal a Denied Insurance Claim in Florida",
+    description:
+      "Florida offers external review, prompt payment rules, and HMO balance billing protections. Here's how to fight a denied claim in Florida.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim florida",
+      "florida insurance denial",
+      "OIR complaint florida",
+      "florida balance billing",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-illinois",
+    title: "How to Appeal a Denied Insurance Claim in Illinois",
+    description:
+      "Illinois SB 1840 protects you from surprise bills, and the state offers binding external review. Here's how to appeal a denied claim in IL.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim illinois",
+      "illinois insurance denial",
+      "illinois external review",
+      "IL DOI complaint",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-pennsylvania",
+    title: "How to Appeal a Denied Insurance Claim in Pennsylvania",
+    description:
+      "Pennsylvania Act 112 bans surprise billing and Act 68 gives you binding external review rights. Here's how to appeal a denial in PA.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim pennsylvania",
+      "PA insurance denial",
+      "pennsylvania external review",
+      "PID complaint",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-ohio",
+    title: "How to Appeal a Denied Insurance Claim in Ohio",
+    description:
+      "Ohio law gives you external review rights and HMO-specific protections. Here's how to fight a denied insurance claim in OH step by step.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim ohio",
+      "ohio insurance denial",
+      "ODI complaint ohio",
+      "ohio external review",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-georgia",
+    title: "How to Appeal a Denied Insurance Claim in Georgia",
+    description:
+      "Georgia HB 888 protects you from surprise medical bills. Here's how to appeal a denied insurance claim in GA and which agencies can help.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim georgia",
+      "georgia insurance denial",
+      "GA insurance commissioner complaint",
+      "georgia surprise billing",
+    ],
+  },
 ];
 
 export function getArticleBySlug(slug: string): BlogArticle | undefined {

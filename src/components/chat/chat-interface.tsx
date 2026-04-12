@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Send, Loader2, User, AlertCircle, RefreshCw, Shield, Paperclip, X, ImageIcon } from "lucide-react";
+import { Send, Loader2, User, AlertCircle, RefreshCw, Shield, Paperclip, X, ImageIcon, ThumbsUp, ThumbsDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { SourceOverlay } from "@/components/documents/source-overlay";
 import { VoiceInput } from "@/components/chat/voice-input";
@@ -20,12 +20,53 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   imageUrl?: string;
+  feedback?: string | null;
   createdAt?: Date;
 }
 
 interface ChatInterfaceProps {
   conversationId: string;
   initialMessages?: Message[];
+}
+
+function FeedbackButtons({ message, onFeedback }: { message: Message; onFeedback: (fb: string | null) => void }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleFeedback(type: "positive" | "negative") {
+    const newFeedback = message.feedback === type ? null : type;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/messages/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: message.id, feedback: newFeedback }),
+      });
+      if (res.ok) onFeedback(newFeedback);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-1 mt-1.5 -ml-1">
+      <button
+        onClick={() => handleFeedback("positive")}
+        disabled={loading}
+        className={`p-1 rounded hover:bg-muted transition-colors ${message.feedback === "positive" ? "text-green-600" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+        title="Helpful"
+      >
+        <ThumbsUp className="w-3.5 h-3.5" />
+      </button>
+      <button
+        onClick={() => handleFeedback("negative")}
+        disabled={loading}
+        className={`p-1 rounded hover:bg-muted transition-colors ${message.feedback === "negative" ? "text-red-500" : "text-muted-foreground/50 hover:text-muted-foreground"}`}
+        title="Not helpful"
+      >
+        <ThumbsDown className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
 }
 
 export function ChatInterface({
@@ -301,6 +342,11 @@ export function ChatInterface({
                           >
                             {message.content}
                           </ReactMarkdown>
+                          {message.id && !message.id.startsWith("temp-") && (
+                            <FeedbackButtons message={message} onFeedback={(fb) => {
+                              setMessages(prev => prev.map(m => m.id === message.id ? { ...m, feedback: fb } : m));
+                            }} />
+                          )}
                         </div>
                       ) : (
                         <div>
