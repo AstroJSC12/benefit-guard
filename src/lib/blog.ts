@@ -87,6 +87,51 @@ export const articles: BlogArticle[] = [
       "emergency room out of network bill",
     ],
   },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-new-york",
+    title: "How to Appeal a Denied Insurance Claim in New York",
+    description:
+      "New York has some of the strongest surprise bill and insurance appeal protections in the country. Here's how to use them to fight a denied claim in NY.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim new york",
+      "NY insurance denial",
+      "new york external appeal",
+      "DFS insurance complaint new york",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-california",
+    title: "How to Appeal a Denied Insurance Claim in California",
+    description:
+      "California's Independent Medical Review gives you a free, binding appeal when your insurer denies care. Here's exactly how to use it.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim california",
+      "california independent medical review",
+      "DMHC complaint",
+      "CA insurance denial",
+    ],
+  },
+  {
+    slug: "how-to-appeal-denied-insurance-claim-texas",
+    title: "How to Appeal a Denied Insurance Claim in Texas",
+    description:
+      "Texas SB 1264 protects you from surprise bills, and state law gives you strong appeal rights. Here's how to fight a denied claim in Texas step by step.",
+    publishedAt: "2026-04-11",
+    readingTime: "9 min read",
+    category: "guides",
+    keywords: [
+      "appeal denied insurance claim texas",
+      "texas insurance denial",
+      "TDI complaint texas",
+      "texas surprise bill law",
+    ],
+  },
 ];
 
 export function getArticleBySlug(slug: string): BlogArticle | undefined {
